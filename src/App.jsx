@@ -1,122 +1,66 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
-import './App.css'
+import { useState } from 'react';
+import { Users, Warehouse, TrendingUp, DollarSign, AlertTriangle } from 'lucide-react';
+import Sidebar from './components/Layout/Sidebar';
+import Header from './components/Layout/Header';
+import StatCard from './components/Dashboard/StatCard';
+import RevenueChart from './components/Dashboard/RevenueChart';
+import StockDoughnut from './components/Dashboard/StockDoughnut';
+import RecentActivity from './components/Dashboard/RecentActivity';
+import TopProducts from './components/Dashboard/TopProducts';
+import EmployeeTable from './components/Employees/EmployeeTable';
+import StockTable from './components/Stock/StockTable';
+import { INITIAL_EMPLOYEES } from './data/employees';
+import { INITIAL_STOCK } from './data/stock';
+import { ToastProvider } from './context/ToastContext';
 
-function App() {
-  const [count, setCount] = useState(0)
+function DashboardView({ employees, stock }) {
+  const stats = [
+    { label: 'Employés Actifs', value: employees.filter(e => e.status === 'active').length, suffix: `/${employees.length}`, icon: Users, color: '#F97316', trend: '+2 ce mois', trendUp: true },
+    { label: 'Valeur du Stock', value: (stock.reduce((s, i) => s + i.qty * i.price, 0) / 1000000).toFixed(1), suffix: 'M DA', icon: Warehouse, color: '#3B82F6', trend: '+12% vs trim. préc.', trendUp: true },
+    { label: 'Alertes Stock', value: stock.filter(i => { const s = i.qty === 0 ? 'empty' : i.qty <= i.minQty ? 'low' : 'normal'; return s === 'low' || s === 'empty'; }).length, suffix: 'produits', icon: AlertTriangle, color: '#EF4444', trend: 'Nécessite action', trendUp: false },
+    { label: 'Masse Salariale', value: (employees.filter(e => e.status === 'active').reduce((s, e) => s + e.salary, 0) / 1000000).toFixed(1), suffix: 'M DA/mois', icon: DollarSign, color: '#10B981', trend: 'Budget stable', trendUp: true },
+  ];
 
   return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.jsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
-
-      <div className="ticks"></div>
-
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
-
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
-  )
+    <div className="animate-fade-in">
+      <div className="mb-7">
+        <h1 className="font-display" style={{ fontSize: 28, fontWeight: 700, marginBottom: 4 }}>Tableau de Bord</h1>
+        <p className="text-sm" style={{ color: '#64748B' }}>Vue d'ensemble de l'activité Bechedhli Solar Energy</p>
+      </div>
+      <div className="grid gap-4 mb-7" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))' }}>
+        {stats.map((s, i) => <StatCard key={i} {...s} delay={i * 0.1} />)}
+      </div>
+      <div className="grid gap-4 mb-7" style={{ gridTemplateColumns: '2fr 1fr' }}>
+        <RevenueChart />
+        <StockDoughnut stock={stock} />
+      </div>
+      <div className="grid grid-cols-2 gap-4">
+        <RecentActivity />
+        <TopProducts stock={stock} />
+      </div>
+    </div>
+  );
 }
 
-export default App
+export default function App() {
+  const [activeView, setActiveView] = useState('dashboard');
+  const [employees, setEmployees] = useState(INITIAL_EMPLOYEES);
+  const [stock, setStock] = useState(INITIAL_STOCK);
+
+  return (
+    <ToastProvider>
+      <div className="flex min-h-screen">
+        <div className="bg-mesh fixed inset-0 z-0 pointer-events-none" />
+        <Sidebar activeView={activeView} setActiveView={setActiveView} />
+        <main className="flex-1 relative z-[1] h-screen overflow-y-auto" style={{ marginLeft: 260 }}>
+          <Header activeView={activeView} />
+          <div className="px-8 py-7" key={activeView}>
+            {activeView === 'dashboard' && <DashboardView employees={employees} stock={stock} />}
+            {activeView === 'employees' && <EmployeeTable employees={employees} setEmployees={setEmployees} />}
+            {activeView === 'stock' && <StockTable stock={stock} setStock={setStock} />}
+          </div>
+        </main>
+      </div>
+    </ToastProvider>
+  );
+}
