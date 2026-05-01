@@ -1,13 +1,14 @@
 import { useState, useMemo } from 'react';
-import { Search, Plus, Pencil, Trash2, List, LayoutGrid, AlertTriangle, SolarPanel, Zap, Battery, Cable, Wrench } from 'lucide-react';
-import { CATEGORIES, LOCATIONS, getStockStatus, CAT_META, formatDZD } from '../../data/stock';
+import { Search, Plus, List, LayoutGrid, AlertTriangle, Pencil, Trash2 } from 'lucide-react';
+import { CATEGORIES, getStockStatus, CAT_META } from '../../data/stock';
+import { formatDZD } from '../../data/employees';
 import Badge from '../UI/Badge';
-import Modal from '../UI/Modal';
 import ConfirmModal from '../UI/ConfirmModal';
 import StockForm from './StockForm';
+import StockGrid from './StockGrid';
 import { useToast } from '../../context/ToastContext';
 
-const ICON_MAP = { SolarPanel, Zap, Battery, Cable, Wrench };
+const ICON_MAP = { SolarPanel: Pencil, Zap: Pencil, Battery: Pencil, Cable: Pencil, Wrench: Pencil };
 
 export default function StockTable({ stock, setStock }) {
   const addToast = useToast();
@@ -60,7 +61,7 @@ export default function StockTable({ stock, setStock }) {
     return '#10B981';
   };
 
-  const getCatIcon = (cat) => { const meta = CAT_META[cat]; return meta ? ICON_MAP[meta.icon] || Wrench : Wrench; };
+  const getCatIcon = (cat) => { const meta = CAT_META[cat]; return meta ? ICON_MAP[meta.icon] || Pencil : Pencil; };
   const getCatColor = (cat) => CAT_META[cat]?.color || '#64748B';
 
   const stockBadgeStatus = (item) => {
@@ -174,41 +175,7 @@ export default function StockTable({ stock, setStock }) {
           </div>
         </div>
       ) : (
-        <div className="grid gap-4" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))' }}>
-          {filtered.length === 0 ? (
-            <div className="rounded-2xl p-10 text-center" style={{ color: '#64748B', background: 'linear-gradient(135deg, rgba(13,21,37,0.9), rgba(13,21,37,0.6))', border: '1px solid rgba(255,255,255,0.06)', gridColumn: '1/-1' }}>Aucun produit trouvé</div>
-          ) : filtered.map((item, i) => {
-            const CatIcon = getCatIcon(item.category);
-            const catColor = getCatColor(item.category);
-            const pct = Math.min(100, (item.qty / (item.minQty * 3)) * 100);
-            return (
-              <div key={item.id} className="rounded-2xl p-5 transition-all hover:-translate-y-0.5" style={{ background: 'linear-gradient(135deg, rgba(13,21,37,0.9), rgba(13,21,37,0.6))', backdropFilter: 'blur(12px)', border: '1px solid rgba(255,255,255,0.06)', animation: `slideUp 0.3s ease-out ${i * 0.04}s both` }}>
-                <div className="flex justify-between items-start mb-3.5">
-                  <div className="flex items-center justify-center rounded-xl" style={{ width: 44, height: 44, background: `${catColor}15` }}><CatIcon size={18} style={{ color: catColor }} /></div>
-                  <Badge status={stockBadgeStatus(item)} />
-                </div>
-                <h4 className="font-display text-sm font-bold mb-1 leading-snug">{item.name}</h4>
-                <p className="text-xs mb-3.5" style={{ color: '#64748B' }}>{item.supplier} — {item.location}</p>
-                <div className="mb-3.5">
-                  <div className="flex justify-between mb-1.5">
-                    <span className="text-xs" style={{ color: '#64748B' }}>Stock</span>
-                    <span className="text-xs font-display font-bold" style={{ color: progressColor(item) }}>{item.qty} / min {item.minQty}</span>
-                  </div>
-                  <div className="h-2 rounded-full overflow-hidden" style={{ background: 'rgba(255,255,255,0.06)' }}>
-                    <div className="h-full rounded-full transition-all duration-1000" style={{ width: `${pct}%`, background: `linear-gradient(90deg, ${progressColor(item)}, ${progressColor(item)}88)` }} />
-                  </div>
-                </div>
-                <div className="flex justify-between items-center pt-3.5" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
-                  <span className="font-display text-[15px] font-bold" style={{ color: '#F97316' }}>{formatDZD(item.price)}</span>
-                  <div className="flex gap-1.5">
-                    <ActionBtn icon={Pencil} onClick={() => openEdit(item)} hoverColor="#3B82F6" />
-                    <ActionBtn icon={Trash2} onClick={() => { setSelected(item); setDeleteOpen(true); }} hoverColor="#EF4444" />
-                  </div>
-                </div>
-              </div>
-            );
-          })}
-        </div>
+        <StockGrid stock={filtered} onEdit={openEdit} onDelete={(item) => { setSelected(item); setDeleteOpen(true); }} />
       )}
 
       <StockForm isOpen={formOpen} onClose={() => setFormOpen(false)} editing={editing} onSave={handleSave} addToast={addToast} />
