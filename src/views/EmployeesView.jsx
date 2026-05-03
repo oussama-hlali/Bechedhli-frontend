@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react';
 import { Modal, ConfirmModal } from '../components/Modal';
-import { DEPARTMENTS, ROLES, getAvatarColor, getInitials, formatTND } from '../data';
+import { DEPARTMENTS, ROLES, getAvatarColor, getInitials, formatDA } from '../data';
 
 export default function EmployeesView({ employees, setEmployees, addToast }) {
   const [search, setSearch] = useState('');
@@ -113,7 +113,7 @@ export default function EmployeesView({ employees, setEmployees, addToast }) {
                   <td style={{ color: 'var(--fg-muted)', fontSize: 13 }}>{emp.role}</td>
                   <td style={{ fontSize: 13, color: '#94A3B8' }}>{emp.dept}</td>
                   <td>{statusBadge(emp.status)}</td>
-                  <td style={{ fontWeight: 600, fontFamily: 'Space Grotesk', fontSize: 13 }}>{formatTND(emp.salary)}</td>
+                  <td style={{ fontWeight: 600, fontFamily: 'Space Grotesk', fontSize: 13 }}>{formatDA(emp.salary)}</td>
                   <td>
                     <div style={{ display: 'flex', gap: 6 }} onClick={e => e.stopPropagation()}>
                       <ActionBtn type="edit" onClick={() => openEdit(emp)} label="Modifier" />
@@ -202,7 +202,7 @@ export default function EmployeesView({ employees, setEmployees, addToast }) {
                 ["Département", selected.dept, 'fa-building'],
                 ["Téléphone", selected.phone, 'fa-phone'],
                 ["Email", selected.email, 'fa-envelope'],
-                ["Salaire", formatTND(selected.salary), 'fa-money-bill'],
+                ["Salaire", formatDA(selected.salary), 'fa-money-bill'],
                 ["Date d'embauche", new Date(selected.joinDate).toLocaleDateString('fr-FR'), 'fa-calendar'],
                 ["Ancienneté", `${Math.floor((Date.now() - new Date(selected.joinDate).getTime()) / (1000*60*60*24*365))} ans`, 'fa-clock'],
               ].map(([label, val, icon], i) => (

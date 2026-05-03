@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react';
 import { Modal, ConfirmModal } from '../components/Modal';
-import { CATEGORIES, LOCATIONS, getStockStatus, formatTND, CAT_ICONS, CAT_COLORS } from '../data';
+import { CATEGORIES, LOCATIONS, getStockStatus, formatDA, CAT_ICONS, CAT_COLORS } from '../data';
 
 export default function StockView({ stock, setStock, addToast }) {
   const [search, setSearch] = useState('');
@@ -165,8 +165,8 @@ export default function StockView({ stock, setStock, addToast }) {
                           </div>
                         </div>
                       </td>
-                      <td style={{ fontFamily: 'Space Grotesk', fontSize: 13 }}>{formatTND(item.price)}</td>
-                      <td style={{ fontFamily: 'Space Grotesk', fontWeight: 700, fontSize: 13, color: '#F97316' }}>{formatTND(item.qty * item.price)}</td>
+                      <td style={{ fontFamily: 'Space Grotesk', fontSize: 13 }}>{formatDA(item.price)}</td>
+                      <td style={{ fontFamily: 'Space Grotesk', fontWeight: 700, fontSize: 13, color: '#F97316' }}>{formatDA(item.qty * item.price)}</td>
                       <td style={{ fontSize: 13, color: 'var(--fg-muted)' }}>{item.supplier}</td>
                       <td>
                         <div style={{ display: 'flex', gap: 6 }}>
@@ -210,7 +210,7 @@ export default function StockView({ stock, setStock, addToast }) {
                   </div>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: 14, borderTop: '1px solid var(--border)' }}>
-                  <span style={{ fontSize: 15, fontWeight: 700, fontFamily: 'Space Grotesk', color: '#F97316' }}>{formatTND(item.price)}</span>
+                  <span style={{ fontSize: 15, fontWeight: 700, fontFamily: 'Space Grotesk', color: '#F97316' }}>{formatDA(item.price)}</span>
                   <div style={{ display: 'flex', gap: 6 }}>
                     <ActionBtn type="edit" onClick={() => openEdit(item)} label="Modifier" small />
                     <ActionBtn type="delete" onClick={() => { setSelected(item); setDeleteOpen(true); }} label="Supprimer" small />

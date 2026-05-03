@@ -8,8 +8,8 @@ export default function RevenueChart() {
   const data = {
     labels: ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Jun', 'Jul', 'Aoû', 'Sep', 'Oct', 'Nov', 'Déc'],
     datasets: [
-      { label: 'Revenus (M DA)', data: [4.2,5.1,6.8,7.2,8.5,9.1,10.3,11.8,10.5,12.2,13.8,15.1], borderColor: '#F97316', backgroundColor: 'rgba(249,115,22,0.1)', fill: true, tension: 0.4, borderWidth: 2.5, pointRadius: 0, pointHoverRadius: 6 },
-      { label: 'Dépenses (M DA)', data: [3.1,3.8,4.5,5.0,5.8,6.2,7.0,7.5,7.2,8.0,8.5,9.2], borderColor: '#3B82F6', backgroundColor: 'rgba(59,130,246,0.05)', fill: true, tension: 0.4, borderWidth: 2, pointRadius: 0, pointHoverRadius: 5 },
+      { label: 'Revenus (M TND)', data: [4.2,5.1,6.8,7.2,8.5,9.1,10.3,11.8,10.5,12.2,13.8,15.1], borderColor: '#F97316', backgroundColor: 'rgba(249,115,22,0.1)', fill: true, tension: 0.4, borderWidth: 2.5, pointRadius: 0, pointHoverRadius: 6 },
+      { label: 'Dépenses (M TND)', data: [3.1,3.8,4.5,5.0,5.8,6.2,7.0,7.5,7.2,8.0,8.5,9.2], borderColor: '#3B82F6', backgroundColor: 'rgba(59,130,246,0.05)', fill: true, tension: 0.4, borderWidth: 2, pointRadius: 0, pointHoverRadius: 5 },
     ],
   };
 

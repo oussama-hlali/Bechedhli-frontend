@@ -4,7 +4,7 @@ const activities = [
   { icon: UserPlus, color: '#10B981', text: 'Djamila Saadi ajoutée au département Commercial', time: 'Il y a 2h' },
   { icon: Package, color: '#F97316', text: '48 Panneaux 400W réceptionnés — Entrepôt A', time: 'Il y a 5h' },
   { icon: AlertTriangle, color: '#EF4444', text: 'Connecteurs MC4 en rupture de stock', time: 'Il y a 8h' },
-  { icon: FileText, color: '#3B82F6', text: 'Facture #2024-0847 validée — 2.4M DA', time: 'Hier' },
+  { icon: FileText, color: '#3B82F6', text: 'Facture #2024-0847 validée — 2.4M TND', time: 'Hier' },
   { icon: Wrench, color: '#F59E0B', text: 'Maintenance onduleur client — Ouargla', time: 'Hier' },
 ];
 
