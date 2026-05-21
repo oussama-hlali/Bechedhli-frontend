@@ -15,7 +15,7 @@ export default function Sidebar({ activeView, setActiveView }) {
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
           <SolarLogo size={42} />
           <div>
-            <h2 style={{ fontSize: 17, fontWeight: 700, color: '#E2E8F0', lineHeight: 1.2 }}>Bechedhli</h2>
+            <h2 style={{ fontSize: 17, fontWeight: 700, color: 'var(--fg)', lineHeight: 1.2 }}>Bechedhli</h2>
             <p style={{ fontSize: 11, fontWeight: 600, color: 'var(--solar-orange)', letterSpacing: '0.08em', textTransform: 'uppercase' }}>Solar Energy</p>
           </div>
         </div>
@@ -30,7 +30,7 @@ export default function Sidebar({ activeView, setActiveView }) {
         ))}
       </nav>
       <div style={{ padding: 16, borderTop: '1px solid var(--border)' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '10px 12px', background: 'rgba(255,255,255,0.02)', borderRadius: 12 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '10px 12px', background: 'var(--sidebar-user-bg)', borderRadius: 12 }}>
           <div className="avatar" style={{ width: 38, height: 38, background: 'rgba(249,115,22,0.15)', color: '#F97316', fontSize: 13 }}>DC</div>
           <div style={{ flex: 1, minWidth: 0 }}>
             <p style={{ fontSize: 13, fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Directeur Commercial</p>

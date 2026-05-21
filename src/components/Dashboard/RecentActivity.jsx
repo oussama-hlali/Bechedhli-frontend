@@ -10,19 +10,19 @@ const activities = [
 
 export default function RecentActivity() {
   return (
-    <div className="rounded-2xl p-6 animate-slide-up" style={{ background: 'linear-gradient(135deg, rgba(13,21,37,0.9), rgba(13,21,37,0.6))', backdropFilter: 'blur(12px)', border: '1px solid rgba(255,255,255,0.06)', animationDelay: '0.25s' }}>
+    <div className="glass-card rounded-2xl p-6 animate-slide-up" style={{ animationDelay: '0.25s' }}>
       <h3 className="font-display mb-4" style={{ fontSize: 15, fontWeight: 700 }}>Activité Récente</h3>
       <div className="flex flex-col">
         {activities.map((a, i) => {
           const Icon = a.icon;
           return (
-            <div key={i} className={`flex gap-3 py-3 ${i < activities.length - 1 ? 'border-b' : ''}`} style={{ borderColor: 'rgba(255,255,255,0.06)' }}>
+            <div key={i} className={`flex gap-3 py-3 ${i < activities.length - 1 ? 'border-b' : ''}`} style={{ borderColor: 'var(--border)' }}>
               <div className="shrink-0 flex items-center justify-center rounded-lg" style={{ width: 32, height: 32, background: `${a.color}15` }}>
                 <Icon size={12} style={{ color: a.color }} />
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-[13px] leading-relaxed">{a.text}</p>
-                <p className="text-xs mt-0.5" style={{ color: '#64748B' }}>{a.time}</p>
+                <p className="text-xs mt-0.5" style={{ color: 'var(--fg-muted)' }}>{a.time}</p>
               </div>
             </div>
           );

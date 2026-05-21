@@ -32,12 +32,12 @@ export default function StockGrid({ stock, onEdit, onDelete }) {
   return (
     <div className="grid gap-4" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))' }}>
       {stock.length === 0 ? (
-        <div className="rounded-2xl p-10 text-center" style={{ color: '#64748B', background: 'linear-gradient(135deg, rgba(13,21,37,0.9), rgba(13,21,37,0.6))', border: '1px solid rgba(255,255,255,0.06)', gridColumn: '1/-1' }}>Aucun produit trouvé</div>
+        <div className="glass-card rounded-2xl p-10 text-center" style={{ gridColumn: '1/-1' }}>Aucun produit trouvé</div>
       ) : stock.map((item, i) => {
         const catColor = getCatColor(item.category);
         const pct = Math.min(100, (item.qty / (item.minQty * 3)) * 100);
         return (
-          <div key={item.id} className="rounded-2xl p-5 transition-all hover:-translate-y-0.5" style={{ background: 'linear-gradient(135deg, rgba(13,21,37,0.9), rgba(13,21,37,0.6))', backdropFilter: 'blur(12px)', border: '1px solid rgba(255,255,255,0.06)', animation: `slideUp 0.3s ease-out ${i * 0.04}s both` }}>
+          <div key={item.id} className="glass-card rounded-2xl p-5 transition-all hover:-translate-y-0.5" style={{ animation: `slideUp 0.3s ease-out ${i * 0.04}s both` }}>
             <div className="flex justify-between items-start mb-3.5">
               <div className="flex items-center justify-center rounded-xl" style={{ width: 44, height: 44, background: `${catColor}15` }}>
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={catColor} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -51,17 +51,17 @@ export default function StockGrid({ stock, onEdit, onDelete }) {
               <Badge status={stockBadgeStatus(item)} />
             </div>
             <h4 className="font-display text-sm font-bold mb-1 leading-snug">{item.name}</h4>
-            <p className="text-xs mb-3.5" style={{ color: '#64748B' }}>{item.supplier} — {item.location}</p>
+            <p className="text-xs mb-3.5" style={{ color: 'var(--fg-muted)' }}>{item.supplier} — {item.location}</p>
             <div className="mb-3.5">
               <div className="flex justify-between mb-1.5">
-                <span className="text-xs" style={{ color: '#64748B' }}>Stock</span>
+                <span className="text-xs" style={{ color: 'var(--fg-muted)' }}>Stock</span>
                 <span className="text-xs font-display font-bold" style={{ color: progressColor(item) }}>{item.qty} / min {item.minQty}</span>
               </div>
-              <div className="h-2 rounded-full overflow-hidden" style={{ background: 'rgba(255,255,255,0.06)' }}>
+              <div className="h-2 rounded-full overflow-hidden" style={{ background: 'rgba(0,0,0,0.06)' }}>
                 <div className="h-full rounded-full transition-all duration-1000" style={{ width: `${pct}%`, background: `linear-gradient(90deg, ${progressColor(item)}, ${progressColor(item)}88)` }} />
               </div>
             </div>
-            <div className="flex justify-between items-center pt-3.5" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+            <div className="flex justify-between items-center pt-3.5" style={{ borderTop: '1px solid var(--border)' }}>
               <span className="font-display text-[15px] font-bold" style={{ color: '#F97316' }}>{formatDZD(item.price)}</span>
               <div className="flex gap-1.5">
                 <StockActionBtn onClick={() => onEdit(item)} hoverColor="#3B82F6" label="Modifier" />
@@ -77,9 +77,9 @@ export default function StockGrid({ stock, onEdit, onDelete }) {
 
 function StockActionBtn({ onClick, hoverColor, label }) {
   return (
-    <button onClick={onClick} className="flex items-center justify-center rounded-lg cursor-pointer transition-all" style={{ width: 30, height: 30, border: '1px solid rgba(255,255,255,0.06)', background: 'transparent', color: '#64748B', fontSize: 11 }}
+    <button onClick={onClick} className="flex items-center justify-center rounded-lg cursor-pointer transition-all" style={{ width: 30, height: 30, border: '1px solid var(--border)', background: 'transparent', color: 'var(--fg-muted)', fontSize: 11 }}
       onMouseEnter={e => { e.currentTarget.style.color = hoverColor; e.currentTarget.style.borderColor = hoverColor; }}
-      onMouseLeave={e => { e.currentTarget.style.color = '#64748B'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.06)'; }}
+      onMouseLeave={e => { e.currentTarget.style.color = 'var(--fg-muted)'; e.currentTarget.style.borderColor = 'var(--border)'; }}
       aria-label={label}>
       {label === 'Modifier' ? (
         <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" /></svg>

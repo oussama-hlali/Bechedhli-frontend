@@ -171,7 +171,7 @@ export default function ClientsView({ clients, setClients, addToast }) {
                         </div>
                       </td>
                       <td>
-                        <span style={{ fontSize: 13, fontWeight: 500, padding: '4px 10px', borderRadius: 8, background: 'rgba(255,255,255,0.04)', color: '#94A3B8' }}>{client.cin}</span>
+                        <span style={{ fontSize: 13, fontWeight: 500, padding: '4px 10px', borderRadius: 8, background: 'rgba(0,0,0,0.03)', color: 'var(--fg-muted)' }}>{client.cin}</span>
                       </td>
                       <td>
                         <span style={{ fontWeight: 700, fontSize: 14 }}>{st.totalOrders}</span>
@@ -228,7 +228,7 @@ export default function ClientsView({ clients, setClients, addToast }) {
           return (
             <div>
               {/* Header */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 20, padding: '16px 20px', background: 'rgba(255,255,255,0.02)', borderRadius: 14 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 20, padding: '16px 20px', background: 'var(--detail-bg)', borderRadius: 14 }}>
                 <div className="avatar" style={{ width: 56, height: 56, background: 'rgba(249,115,22,0.15)' }}>
                   <i className="fa-solid fa-user" style={{ color: '#F97316', fontSize: 20 }} />
                 </div>
@@ -248,7 +248,7 @@ export default function ClientsView({ clients, setClients, addToast }) {
                   ['fa-map-pin', 'Adresse', c.address],
                   ['fa-calendar', 'Client depuis', new Date(c.createdAt).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })],
                 ].map(([ic, l, v], i) => (
-                  <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 14px', background: 'rgba(255,255,255,0.02)', borderRadius: 10 }}>
+                  <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 14px', background: 'var(--detail-bg)', borderRadius: 10 }}>
                     <div style={{ width: 32, height: 32, borderRadius: 8, background: 'rgba(249,115,22,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                       <i className={`fa-solid ${ic}`} style={{ color: '#F97316', fontSize: 13 }} />
                     </div>
@@ -268,7 +268,7 @@ export default function ClientsView({ clients, setClients, addToast }) {
                   { l: 'En attente', v: st.pending, ic: 'fa-clock', c: '#F59E0B' },
                   { l: 'Total', v: (st.totalSpent / 1000000).toFixed(2) + 'M', ic: 'fa-box', c: '#3B82F6' },
                 ].map((s, i) => (
-                  <div key={i} style={{ textAlign: 'center', padding: '12px 8px', background: 'rgba(255,255,255,0.02)', borderRadius: 10 }}>
+                  <div key={i} style={{ textAlign: 'center', padding: '12px 8px', background: 'var(--detail-bg)', borderRadius: 10 }}>
                     <i className={`fa-solid ${s.ic}`} style={{ color: s.c, fontSize: 15, marginBottom: 6, display: 'block' }} />
                     <p style={{ fontSize: 17, fontWeight: 700 }}>{s.v}</p>
                     <p style={{ fontSize: 10, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--fg-muted)', marginTop: 2 }}>{s.l}</p>
@@ -286,7 +286,7 @@ export default function ClientsView({ clients, setClients, addToast }) {
                 </div>
 
                 {c.orders.length === 0 ? (
-                  <div style={{ textAlign: 'center', padding: 32, background: 'rgba(255,255,255,0.02)', borderRadius: 14, color: 'var(--fg-muted)' }}>
+                  <div style={{ textAlign: 'center', padding: 32, background: 'var(--detail-bg)', borderRadius: 14, color: 'var(--fg-muted)' }}>
                     <i className="fa-solid fa-box-open" style={{ fontSize: 28, marginBottom: 8, opacity: 0.3, display: 'block' }} />
                     <p style={{ fontSize: 13 }}>Aucune commande pour ce client</p>
                   </div>
@@ -296,7 +296,7 @@ export default function ClientsView({ clients, setClients, addToast }) {
                       <div key={order.id} className={`order-card ${order.received ? 'order-card-received' : 'order-card-pending'}`} style={{ animation: `slideUp 0.3s ease-out ${i * 0.06}s both` }}>
                         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
                           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                            <span style={{ fontSize: 12, fontWeight: 700, padding: '4px 10px', borderRadius: 8, background: 'rgba(255,255,255,0.05)', color: '#94A3B8' }}>#{String(order.id).padStart(4, '0')}</span>
+                            <span style={{ fontSize: 12, fontWeight: 700, padding: '4px 10px', borderRadius: 8, background: 'rgba(0,0,0,0.03)', color: 'var(--fg-muted)' }}>#{String(order.id).padStart(4, '0')}</span>
                             <span style={{ fontSize: 12, color: 'var(--fg-muted)' }}>Commandé le {new Date(order.orderDate).toLocaleDateString('fr-FR')}</span>
                           </div>
                           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -315,11 +315,11 @@ export default function ClientsView({ clients, setClients, addToast }) {
                           {order.items.map((item, ii) => (
                             <div key={ii} style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13 }}>
                               <i className="fa-solid fa-box" style={{ color: 'var(--fg-muted)', fontSize: 11, flexShrink: 0 }} />
-                              <span style={{ color: '#CBD5E1' }}>{item}</span>
+                              <span style={{ color: 'var(--fg-muted)' }}>{item}</span>
                             </div>
                           ))}
                         </div>
-                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingTop: 10, borderTop: '1px solid rgba(255,255,255,0.04)' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingTop: 10, borderTop: '1px solid var(--border)' }}>
                           <span style={{ fontSize: 14, fontWeight: 700, color: '#F97316' }}>{formatDA(order.total)}</span>
                           {order.received && order.receivedDate ? (
                             <span style={{ fontSize: 12, display: 'flex', alignItems: 'center', gap: 5, color: '#10B981' }}><i className="fa-solid fa-circle-check" style={{ fontSize: 11 }} />Réception : {new Date(order.receivedDate).toLocaleDateString('fr-FR')}</span>
@@ -376,9 +376,9 @@ export default function ClientsView({ clients, setClients, addToast }) {
                       <span style={{ fontSize: 13, fontWeight: 700, color: lineT > 0 ? '#F97316' : 'var(--fg-muted)' }}>{lineT > 0 ? formatDA(lineT) : '—'}</span>
                     </div>
                     <button onClick={() => { if (orderLines.length > 1) setOrderLines(prev => prev.filter((_, idx) => idx !== i)); }}
-                      style={{ width: 34, height: 40, borderRadius: 8, border: '1px solid var(--border)', background: 'transparent', color: orderLines.length > 1 ? 'var(--fg-muted)' : 'rgba(255,255,255,0.08)', cursor: orderLines.length > 1 ? 'pointer' : 'default', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.2s' }}
+                      style={{ width: 34, height: 40, borderRadius: 8, border: '1px solid var(--border)', background: 'transparent', color: orderLines.length > 1 ? 'var(--fg-muted)' : 'rgba(0,0,0,0.08)', cursor: orderLines.length > 1 ? 'pointer' : 'default', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.2s' }}
                       onMouseEnter={e => { if (orderLines.length > 1) { e.currentTarget.style.color = '#EF4444'; e.currentTarget.style.borderColor = '#EF4444'; } }}
-                      onMouseLeave={e => { e.currentTarget.style.color = orderLines.length > 1 ? 'var(--fg-muted)' : 'rgba(255,255,255,0.08)'; e.currentTarget.style.borderColor = 'var(--border)'; }}
+                      onMouseLeave={e => { e.currentTarget.style.color = orderLines.length > 1 ? 'var(--fg-muted)' : 'rgba(0,0,0,0.08)'; e.currentTarget.style.borderColor = 'var(--border)'; }}
                       aria-label="Supprimer ligne">
                       <i className="fa-solid fa-trash" style={{ fontSize: 12 }} />
                     </button>

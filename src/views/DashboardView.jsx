@@ -47,8 +47,8 @@ export default function DashboardView({ employees, stock, clients }) {
         responsive: true, maintainAspectRatio: false,
         plugins: { legend: { display: true, position: 'top', align: 'end', labels: { color: '#64748B', font: { family: 'DM Sans', size: 12 }, usePointStyle: true, pointStyle: 'circle', padding: 16 } } },
         scales: {
-          x: { grid: { color: 'rgba(255,255,255,0.03)' }, ticks: { color: '#64748B', font: { family: 'DM Sans', size: 11 } } },
-          y: { grid: { color: 'rgba(255,255,255,0.03)' }, ticks: { color: '#64748B', font: { family: 'DM Sans', size: 11 }, callback: v => v + 'M' } },
+          x: { grid: { color: 'rgba(0,0,0,0.05)' }, ticks: { color: '#64748B', font: { family: 'DM Sans', size: 11 } } },
+          y: { grid: { color: 'rgba(0,0,0,0.05)' }, ticks: { color: '#64748B', font: { family: 'DM Sans', size: 11 }, callback: v => v + 'M' } },
         },
         interaction: { intersect: false, mode: 'index' },
       },
@@ -137,7 +137,7 @@ export default function DashboardView({ employees, stock, clients }) {
           <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
             {topProducts.map((p, i) => (
               <div key={p.id} style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                <span style={{ width: 22, height: 22, borderRadius: 6, background: i === 0 ? 'rgba(249,115,22,0.15)' : 'rgba(255,255,255,0.04)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 700, color: i === 0 ? '#F97316' : 'var(--fg-muted)' }}>{i + 1}</span>
+                <span style={{ width: 22, height: 22, borderRadius: 6, background: i === 0 ? 'rgba(249,115,22,0.15)' : 'rgba(0,0,0,0.04)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 700, color: i === 0 ? '#F97316' : 'var(--fg-muted)' }}>{i + 1}</span>
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <p style={{ fontSize: 13, fontWeight: 500, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{p.name}</p>
                   <p style={{ fontSize: 11, color: 'var(--fg-muted)' }}>{p.qty} unités</p>

@@ -72,7 +72,7 @@ export default function StockTable({ stock, setStock }) {
     return 'normal';
   };
 
-  const inputStyle = { background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 10, padding: '10px 14px', color: '#F1F5F9', fontSize: 14 };
+  const inputStyle = { background: 'rgba(0,0,0,0.02)', border: '1px solid var(--border)', borderRadius: 10, padding: '10px 14px', color: 'var(--fg)', fontSize: 14 };
 
   return (
     <div className="animate-fade-in">
@@ -97,24 +97,24 @@ export default function StockTable({ stock, setStock }) {
         </div>
       )}
 
-      <div className="rounded-2xl p-4 mb-5 flex gap-3 flex-wrap items-center" style={{ background: 'linear-gradient(135deg, rgba(13,21,37,0.9), rgba(13,21,37,0.6))', backdropFilter: 'blur(12px)', border: '1px solid rgba(255,255,255,0.06)' }}>
+      <div className="glass-card rounded-2xl p-4 mb-5 flex gap-3 flex-wrap items-center">
         <div className="relative flex-1 min-w-[200px]">
-          <Search size={13} className="absolute left-3.5 top-1/2 -translate-y-1/2" style={{ color: '#64748B' }} />
+          <Search size={13} className="absolute left-3.5 top-1/2 -translate-y-1/2" style={{ color: 'var(--fg-muted)' }} />
           <input className="input-field w-full pl-10" placeholder="Rechercher par nom ou fournisseur..." value={search} onChange={e => setSearch(e.target.value)} style={inputStyle} />
         </div>
         <select value={catFilter} onChange={e => setCatFilter(e.target.value)} className="input-field" style={{ ...inputStyle, width: 'auto', minWidth: 150, cursor: 'pointer' }}>
-          <option value="all">Toutes catégories</option>{CATEGORIES.map(c => <option key={c} value={c} style={{ background: '#131B2E' }}>{c}</option>)}
+          <option value="all">Toutes catégories</option>{CATEGORIES.map(c => <option key={c} value={c} style={{ background: '#FFFFFF' }}>{c}</option>)}
         </select>
         <select value={statusFilter} onChange={e => setStatusFilter(e.target.value)} className="input-field" style={{ ...inputStyle, width: 'auto', minWidth: 140, cursor: 'pointer' }}>
-          <option value="all">Tous les statuts</option><option value="ok" style={{ background: '#131B2E' }}>Normal</option><option value="alert" style={{ background: '#131B2E' }}>En alerte</option>
+          <option value="all">Tous les statuts</option><option value="ok" style={{ background: '#FFFFFF' }}>Normal</option><option value="alert" style={{ background: '#FFFFFF' }}>En alerte</option>
         </select>
-        <div className="flex gap-1 p-0.5 rounded-[10px]" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}>
+        <div className="flex gap-1 p-0.5 rounded-[10px]" style={{ background: 'rgba(0,0,0,0.02)', border: '1px solid var(--border)' }}>
           {[
             { id: 'table', icon: List }, { id: 'grid', icon: LayoutGrid }
           ].map(v => {
             const Icon = v.icon;
             return (
-              <button key={v.id} onClick={() => setViewMode(v.id)} className="flex items-center justify-center rounded-lg cursor-pointer transition-all" style={{ padding: '7px 12px', border: 'none', background: viewMode === v.id ? 'rgba(249,115,22,0.15)' : 'transparent', color: viewMode === v.id ? '#F97316' : '#64748B' }} aria-label={v.id}>
+              <button key={v.id} onClick={() => setViewMode(v.id)} className="flex items-center justify-center rounded-lg cursor-pointer transition-all" style={{ padding: '7px 12px', border: 'none', background: viewMode === v.id ? 'var(--solar-orange-glow)' : 'transparent', color: viewMode === v.id ? 'var(--solar-orange)' : 'var(--fg-muted)' }} aria-label={v.id}>
                 <Icon size={14} />
               </button>
             );
@@ -123,45 +123,45 @@ export default function StockTable({ stock, setStock }) {
       </div>
 
       {viewMode === 'table' ? (
-        <div className="rounded-2xl overflow-hidden" style={{ background: 'linear-gradient(135deg, rgba(13,21,37,0.9), rgba(13,21,37,0.6))', backdropFilter: 'blur(12px)', border: '1px solid rgba(255,255,255,0.06)' }}>
+        <div className="glass-card rounded-2xl overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full" style={{ borderCollapse: 'separate', borderSpacing: 0 }}>
               <thead>
                 <tr>
                   {['Produit', 'Catégorie', 'Quantité', 'Niveau', 'Prix Unitaire', 'Valeur Totale', 'Fournisseur', 'Actions'].map(h => (
-                    <th key={h} className="text-left px-4 py-3.5 text-[11px] font-bold uppercase tracking-wider border-b" style={{ color: '#64748B', fontFamily: 'Space Grotesk', borderColor: 'rgba(255,255,255,0.06)' }}>{h}</th>
+                    <th key={h} className="text-left px-4 py-3.5 text-[11px] font-bold uppercase tracking-wider border-b" style={{ color: 'var(--fg-muted)', fontFamily: 'Space Grotesk', borderColor: 'var(--border)' }}>{h}</th>
                   ))}
                 </tr>
               </thead>
               <tbody>
                 {filtered.length === 0 ? (
-                  <tr><td colSpan={8} className="text-center py-10" style={{ color: '#64748B' }}>Aucun produit trouvé</td></tr>
+                    <tr><td colSpan={8} className="text-center py-10" style={{ color: 'var(--fg-muted)' }}>Aucun produit trouvé</td></tr>
                 ) : filtered.map((item, i) => {
                   const CatIcon = getCatIcon(item.category);
                   const catColor = getCatColor(item.category);
                   const pct = Math.min(100, (item.qty / (item.minQty * 3)) * 100);
                   return (
                     <tr key={item.id} className="transition-colors hover:bg-orange-500/[0.04]" style={{ animation: `slideUp 0.3s ease-out ${i * 0.03}s both` }}>
-                      <td className="px-4 py-3.5 border-b" style={{ borderColor: 'rgba(255,255,255,0.03)' }}>
+                      <td className="px-4 py-3.5 border-b" style={{ borderColor: 'var(--border)' }}>
                         <div className="flex items-center gap-3">
                           <div className="shrink-0 flex items-center justify-center rounded-[10px]" style={{ width: 38, height: 38, background: `${catColor}15` }}><CatIcon size={14} style={{ color: catColor }} /></div>
-                          <div><p className="font-semibold text-[13px]">{item.name}</p><p className="text-xs" style={{ color: '#64748B' }}>{item.location}</p></div>
+                          <div><p className="font-semibold text-[13px]">{item.name}</p><p className="text-xs" style={{ color: 'var(--fg-muted)' }}>{item.location}</p></div>
                         </div>
                       </td>
-                      <td className="px-4 py-3.5 text-xs font-semibold border-b" style={{ color: catColor, borderColor: 'rgba(255,255,255,0.03)' }}>{item.category}</td>
-                      <td className="px-4 py-3.5 font-display font-bold text-[15px] border-b" style={{ borderColor: 'rgba(255,255,255,0.03)' }}>{item.qty}</td>
-                      <td className="px-4 py-3.5 border-b" style={{ borderColor: 'rgba(255,255,255,0.03)' }}>
+                      <td className="px-4 py-3.5 text-xs font-semibold border-b" style={{ color: catColor, borderColor: 'var(--border)' }}>{item.category}</td>
+                      <td className="px-4 py-3.5 font-display font-bold text-[15px] border-b" style={{ borderColor: 'var(--border)' }}>{item.qty}</td>
+                      <td className="px-4 py-3.5 border-b" style={{ borderColor: 'var(--border)' }}>
                         <div className="flex flex-col gap-1.5 min-w-[100px]">
                           <Badge status={stockBadgeStatus(item)} />
-                          <div className="h-1.5 rounded-full overflow-hidden" style={{ background: 'rgba(255,255,255,0.06)' }}>
+                          <div className="h-1.5 rounded-full overflow-hidden" style={{ background: 'rgba(0,0,0,0.06)' }}>
                             <div className="h-full rounded-full transition-all duration-1000" style={{ width: `${pct}%`, background: progressColor(item) }} />
                           </div>
                         </div>
                       </td>
-                      <td className="px-4 py-3.5 font-display text-[13px] border-b" style={{ borderColor: 'rgba(255,255,255,0.03)' }}>{formatDZD(item.price)}</td>
-                      <td className="px-4 py-3.5 font-display font-bold text-[13px] border-b" style={{ color: '#F97316', borderColor: 'rgba(255,255,255,0.03)' }}>{formatDZD(item.qty * item.price)}</td>
-                      <td className="px-4 py-3.5 text-[13px] border-b" style={{ color: '#94A3B8', borderColor: 'rgba(255,255,255,0.03)' }}>{item.supplier}</td>
-                      <td className="px-4 py-3.5 border-b" style={{ borderColor: 'rgba(255,255,255,0.03)' }}>
+                      <td className="px-4 py-3.5 font-display text-[13px] border-b" style={{ borderColor: 'var(--border)' }}>{formatDZD(item.price)}</td>
+                      <td className="px-4 py-3.5 font-display font-bold text-[13px] border-b" style={{ color: '#F97316', borderColor: 'var(--border)' }}>{formatDZD(item.qty * item.price)}</td>
+                      <td className="px-4 py-3.5 text-[13px] border-b" style={{ color: 'var(--fg-muted)', borderColor: 'var(--border)' }}>{item.supplier}</td>
+                      <td className="px-4 py-3.5 border-b" style={{ borderColor: 'var(--border)' }}>
                         <div className="flex gap-1.5">
                           <ActionBtn icon={Pencil} onClick={() => openEdit(item)} hoverColor="#3B82F6" />
                           <ActionBtn icon={Trash2} onClick={() => { setSelected(item); setDeleteOpen(true); }} hoverColor="#EF4444" />
@@ -186,9 +186,9 @@ export default function StockTable({ stock, setStock }) {
 
 function ActionBtn({ icon: Icon, onClick, hoverColor }) {
   return (
-    <button onClick={onClick} className="flex items-center justify-center rounded-lg transition-all cursor-pointer" style={{ width: 32, height: 32, border: '1px solid rgba(255,255,255,0.06)', background: 'transparent', color: '#64748B' }}
+    <button onClick={onClick} className="flex items-center justify-center rounded-lg transition-all cursor-pointer" style={{ width: 32, height: 32, border: '1px solid var(--border)', background: 'transparent', color: 'var(--fg-muted)' }}
       onMouseEnter={e => { e.currentTarget.style.borderColor = hoverColor; e.currentTarget.style.color = hoverColor; e.currentTarget.style.background = `${hoverColor}14`; }}
-      onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.06)'; e.currentTarget.style.color = '#64748B'; e.currentTarget.style.background = 'transparent'; }}
+      onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--border)'; e.currentTarget.style.color = 'var(--fg-muted)'; e.currentTarget.style.background = 'transparent'; }}
       aria-label="Action"><Icon size={11} /></button>
   );
 }

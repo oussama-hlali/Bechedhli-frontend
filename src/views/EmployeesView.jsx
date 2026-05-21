@@ -189,7 +189,7 @@ export default function EmployeesView({ employees, setEmployees, addToast }) {
       <Modal isOpen={detailOpen} onClose={() => setDetailOpen(false)} title="Fiche Employé" width={480}>
         {selected && (
           <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 24, padding: 16, background: 'rgba(255,255,255,0.02)', borderRadius: 14 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 24, padding: 16, background: 'var(--detail-bg)', borderRadius: 14 }}>
               <div className="avatar" style={{ width: 56, height: 56, fontSize: 18, background: `${getAvatarColor(selected.id)}20`, color: getAvatarColor(selected.id) }}>{getInitials(selected.name)}</div>
               <div>
                 <h4 style={{ fontSize: 17, fontWeight: 700 }}>{selected.name}</h4>
@@ -206,7 +206,7 @@ export default function EmployeesView({ employees, setEmployees, addToast }) {
                 ["Date d'embauche", new Date(selected.joinDate).toLocaleDateString('fr-FR'), 'fa-calendar'],
                 ["Ancienneté", `${Math.floor((Date.now() - new Date(selected.joinDate).getTime()) / (1000*60*60*24*365))} ans`, 'fa-clock'],
               ].map(([label, val, icon], i) => (
-                <div key={i} style={{ padding: 12, background: 'rgba(255,255,255,0.02)', borderRadius: 10 }}>
+                <div key={i} style={{ padding: 12, background: 'var(--detail-bg)', borderRadius: 10 }}>
                   <p style={{ fontSize: 11, color: 'var(--fg-muted)', marginBottom: 4, display: 'flex', alignItems: 'center', gap: 6 }}>
                     <i className={`fa-solid ${icon}`} style={{ fontSize: 10 }} />{label}
                   </p>

@@ -17,14 +17,14 @@ export default function RevenueChart() {
     responsive: true, maintainAspectRatio: false,
     plugins: { legend: { position: 'top', align: 'end', labels: { color: '#64748B', font: { family: 'DM Sans', size: 12 }, usePointStyle: true, pointStyle: 'circle', padding: 16 } } },
     scales: {
-      x: { grid: { color: 'rgba(255,255,255,0.03)' }, ticks: { color: '#64748B', font: { family: 'DM Sans', size: 11 } } },
-      y: { grid: { color: 'rgba(255,255,255,0.03)' }, ticks: { color: '#64748B', font: { family: 'DM Sans', size: 11 }, callback: v => v + 'M' } },
+      x: { grid: { color: 'rgba(0,0,0,0.05)' }, ticks: { color: '#64748B', font: { family: 'DM Sans', size: 11 } } },
+      y: { grid: { color: 'rgba(0,0,0,0.05)' }, ticks: { color: '#64748B', font: { family: 'DM Sans', size: 11 }, callback: v => v + 'M' } },
     },
     interaction: { intersect: false, mode: 'index' },
   };
 
   return (
-    <div className="rounded-2xl p-6 animate-slide-up" style={{ background: 'linear-gradient(135deg, rgba(13,21,37,0.9), rgba(13,21,37,0.6))', backdropFilter: 'blur(12px)', border: '1px solid rgba(255,255,255,0.06)', animationDelay: '0.15s' }}>
+    <div className="glass-card rounded-2xl p-6 animate-slide-up" style={{ animationDelay: '0.15s' }}>
       <h3 className="font-display mb-5" style={{ fontSize: 15, fontWeight: 700 }}>Revenus vs Dépenses 2024</h3>
       <div style={{ height: 280 }}><Line data={data} options={options} /></div>
     </div>

@@ -18,9 +18,9 @@ export default function EmployeeForm({ isOpen, onClose, editing, onSave, addToas
   };
 
   const fieldClass = "w-full rounded-[10px] px-3.5 py-2.5 text-sm outline-none transition-all";
-  const fieldStyle = { background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)', color: '#F1F5F9' };
+  const fieldStyle = { background: 'rgba(0,0,0,0.02)', border: '1px solid var(--border)', color: 'var(--fg)' };
   const labelClass = "block text-xs font-semibold uppercase tracking-wider mb-1.5";
-  const labelStyle = { color: '#64748B' };
+  const labelStyle = { color: 'var(--fg-muted)' };
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} title={editing ? "Modifier l'Employé" : 'Nouvel Employé'} width={520}>
@@ -32,11 +32,11 @@ export default function EmployeeForm({ isOpen, onClose, editing, onSave, addToas
         <div className="grid grid-cols-2 gap-3">
           <div><label className={labelClass} style={labelStyle}>Rôle *</label>
             <select className={`${fieldClass} input-field`} style={{ ...fieldStyle, cursor: 'pointer' }} value={form.role} onChange={e => setForm({ ...form, role: e.target.value })}>
-              <option value="">Sélectionner...</option>{ROLES.map(r => <option key={r} value={r} style={{ background: '#131B2E' }}>{r}</option>)}
+              <option value="">Sélectionner...</option>{ROLES.map(r => <option key={r} value={r} style={{ background: '#FFFFFF' }}>{r}</option>)}
             </select></div>
           <div><label className={labelClass} style={labelStyle}>Département *</label>
             <select className={`${fieldClass} input-field`} style={{ ...fieldStyle, cursor: 'pointer' }} value={form.dept} onChange={e => setForm({ ...form, dept: e.target.value })}>
-              <option value="">Sélectionner...</option>{DEPARTMENTS.map(d => <option key={d} value={d} style={{ background: '#131B2E' }}>{d}</option>)}
+              <option value="">Sélectionner...</option>{DEPARTMENTS.map(d => <option key={d} value={d} style={{ background: '#FFFFFF' }}>{d}</option>)}
             </select></div>
         </div>
         <div className="grid grid-cols-2 gap-3">
@@ -47,14 +47,14 @@ export default function EmployeeForm({ isOpen, onClose, editing, onSave, addToas
           <div><label className={labelClass} style={labelStyle}>Salaire (DA)</label><input className={`${fieldClass} input-field`} style={fieldStyle} type="number" value={form.salary} onChange={e => setForm({ ...form, salary: e.target.value })} placeholder="80000" /></div>
           <div><label className={labelClass} style={labelStyle}>Statut</label>
             <select className={`${fieldClass} input-field`} style={{ ...fieldStyle, cursor: 'pointer' }} value={form.status} onChange={e => setForm({ ...form, status: e.target.value })}>
-              <option value="active" style={{ background: '#131B2E' }}>Actif</option>
-              <option value="inactive" style={{ background: '#131B2E' }}>Inactif</option>
-              <option value="leave" style={{ background: '#131B2E' }}>En congé</option>
+              <option value="active" style={{ background: '#FFFFFF' }}>Actif</option>
+              <option value="inactive" style={{ background: '#FFFFFF' }}>Inactif</option>
+              <option value="leave" style={{ background: '#FFFFFF' }}>En congé</option>
             </select></div>
         </div>
         <div><label className={labelClass} style={labelStyle}>Date d'embauche</label><input className={`${fieldClass} input-field`} style={fieldStyle} type="date" value={form.joinDate} onChange={e => setForm({ ...form, joinDate: e.target.value })} /></div>
         <div className="flex gap-3 justify-end mt-2">
-          <button onClick={onClose} className="px-5 py-2.5 rounded-xl text-sm font-medium cursor-pointer transition-all" style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.06)', color: '#F1F5F9' }}>Annuler</button>
+          <button onClick={onClose} className="px-5 py-2.5 rounded-xl text-sm font-medium cursor-pointer transition-all" style={{ background: 'rgba(0,0,0,0.03)', border: '1px solid var(--border)', color: 'var(--fg)' }}>Annuler</button>
           <button onClick={handleSave} className="px-5 py-2.5 rounded-xl text-sm font-semibold text-white cursor-pointer transition-all hover:-translate-y-0.5" style={{ background: 'linear-gradient(135deg, #F97316, #EA580C)' }}>{editing ? 'Enregistrer' : 'Ajouter'}</button>
         </div>
       </div>

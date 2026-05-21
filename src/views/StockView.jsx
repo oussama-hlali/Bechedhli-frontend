@@ -112,7 +112,7 @@ export default function StockView({ stock, setStock, addToast }) {
           <option value="alert">Stock bas / Rupture</option>
         </select>
         {/* View toggle */}
-        <div style={{ display: 'flex', gap: 4, background: 'rgba(255,255,255,0.03)', borderRadius: 10, padding: 3, border: '1px solid var(--border)' }}>
+        <div style={{ display: 'flex', gap: 4, background: 'var(--input-bg)', borderRadius: 10, padding: 3, border: '1px solid var(--border)' }}>
           {['table', 'grid'].map(mode => (
             <button key={mode} onClick={() => setViewMode(mode)}
               style={{
