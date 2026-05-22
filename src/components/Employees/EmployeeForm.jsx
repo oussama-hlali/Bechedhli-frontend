@@ -44,7 +44,7 @@ export default function EmployeeForm({ isOpen, onClose, editing, onSave, addToas
           <div><label className={labelClass} style={labelStyle}>Email</label><input className={`${fieldClass} input-field`} style={fieldStyle} type="email" value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} placeholder="nom@bechedhli.dz" /></div>
         </div>
         <div className="grid grid-cols-2 gap-3">
-          <div><label className={labelClass} style={labelStyle}>Salaire (DA)</label><input className={`${fieldClass} input-field`} style={fieldStyle} type="number" value={form.salary} onChange={e => setForm({ ...form, salary: e.target.value })} placeholder="80000" /></div>
+          <div><label className={labelClass} style={labelStyle}>Salaire (TND)</label><input className={`${fieldClass} input-field`} style={fieldStyle} type="number" value={form.salary} onChange={e => setForm({ ...form, salary: e.target.value })} placeholder="80000" /></div>
           <div><label className={labelClass} style={labelStyle}>Statut</label>
             <select className={`${fieldClass} input-field`} style={{ ...fieldStyle, cursor: 'pointer' }} value={form.status} onChange={e => setForm({ ...form, status: e.target.value })}>
               <option value="active" style={{ background: '#FFFFFF' }}>Actif</option>

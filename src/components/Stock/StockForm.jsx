@@ -41,7 +41,7 @@ export default function StockForm({ isOpen, onClose, editing, onSave, addToast }
           <div><label className={ls} style={lst}>Stock minimum</label><input className={`${fs} input-field`} style={fst} type="number" min="0" value={form.minQty} onChange={e => setForm({ ...form, minQty: e.target.value })} placeholder="10" /></div>
         </div>
         <div className="grid grid-cols-2 gap-3">
-          <div><label className={ls} style={lst}>Prix unitaire (DA) *</label><input className={`${fs} input-field`} style={fst} type="number" min="0" value={form.price} onChange={e => setForm({ ...form, price: e.target.value })} placeholder="0" /></div>
+          <div><label className={ls} style={lst}>Prix unitaire (TND) *</label><input className={`${fs} input-field`} style={fst} type="number" min="0" value={form.price} onChange={e => setForm({ ...form, price: e.target.value })} placeholder="0" /></div>
           <div><label className={ls} style={lst}>Fournisseur</label><input className={`${fs} input-field`} style={fst} value={form.supplier} onChange={e => setForm({ ...form, supplier: e.target.value })} placeholder="Ex: Jinko Solar" /></div>
         </div>
         <div className="flex gap-3 justify-end mt-2">

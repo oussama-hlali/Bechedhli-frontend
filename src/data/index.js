@@ -119,3 +119,65 @@ export const getClientStats = (orders) => {
 };
 export const CAT_ICONS = { Panneaux: 'fa-solar-panel', Onduleurs: 'fa-bolt', Batteries: 'fa-battery-three-quarters', Câblage: 'fa-plug', Accessoires: 'fa-screwdriver-wrench' };
 export const CAT_COLORS = { Panneaux: '#F97316', Onduleurs: '#3B82F6', Batteries: '#10B981', Câblage: '#F59E0B', Accessoires: '#8B5CF6' };
+
+export function matchBLtoStock(blItems, stock) {
+  const mutations = [];
+  for (const bi of blItems) {
+    const desc = bi.des.toLowerCase();
+    const qty = bi.qty || 1;
+    const matched = stock.filter(si => si.name.toLowerCase().startsWith(desc) || desc.startsWith(si.name.toLowerCase().split(' ').slice(0, 2).join(' ').toLowerCase()));
+    for (const si of matched) {
+      const decrement = Math.min(qty, si.qty);
+      if (decrement > 0) {
+        mutations.push({ id: si.id, name: si.name, decrement, remaining: si.qty - decrement });
+      }
+    }
+  }
+  return mutations;
+}
+
+export function applyStockMutations(stock, mutations) {
+  return stock.map(si => {
+    const m = mutations.find(m => m.id === si.id);
+    return m ? { ...si, qty: Math.max(0, si.qty - m.decrement) } : si;
+  });
+}
+
+export function createInvoiceFromBL(bl, client, nextNum) {
+  const num = 'FAC-2024-' + String(nextNum).padStart(3, '0');
+  return {
+    id: num,
+    clientId: bl.clientId,
+    dossierId: null,
+    numBL: bl.id,
+    date: new Date().toISOString().split('T')[0],
+    echeance: new Date(Date.now() + 30 * 86400000).toISOString().split('T')[0],
+    status: 'draft',
+    items: [
+      { desc: `Installation panneaux solaires ${bl.puissance}`, qty: 1, unit: 'forfait', prix: 0 },
+      { desc: `Fourniture matériel — ${bl.items.length} article(s)`, qty: 1, unit: 'forfait', prix: 0 },
+    ],
+    tva: 19,
+    remise: 0,
+    payments: [],
+    notes: `Générée automatiquement depuis le Bon de Livraison ${bl.id} (${new Date().toLocaleDateString('fr-FR')}). Montants à définir.`,
+  };
+}
+
+export function computeDashboardMetrics(employees, stock, clients, bls, dossiers, factures) {
+  const activeEmp = employees.filter(e => e.status === 'active').length;
+  const totalStockValue = stock.reduce((s, i) => s + i.qty * i.price, 0);
+  const lowStockCount = stock.filter(i => ['low', 'empty'].includes(getStockStatus(i))).length;
+  const totalBL = bls.length;
+  const deliveredBL = bls.filter(b => b.status === 'delivered').length;
+  const stegApproved = dossiers.filter(d => d.status === 'approved').length;
+  const stegTotal = dossiers.length;
+  const totalBilled = factures.reduce((s, f) => {
+    const ht = f.items.reduce((a, i) => a + i.qty * i.prix, 0);
+    const htNet = ht - ht * (f.remise / 100);
+    return s + htNet + htNet * (f.tva / 100);
+  }, 0);
+  const totalCollected = factures.reduce((s, f) => s + f.payments.reduce((a, p) => a + p.montant, 0), 0);
+  const totalOutstanding = totalBilled - totalCollected;
+  return { activeEmp, totalEmp: employees.length, totalStockValue, lowStockCount, totalBL, deliveredBL, stegApproved, stegTotal, totalBilled, totalCollected, totalOutstanding };
+}

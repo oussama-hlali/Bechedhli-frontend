@@ -5,7 +5,9 @@ const NAV_ITEMS = [
   { id: 'employees', label: 'Gestion des Employés', icon: 'fa-users' },
   { id: 'stock', label: 'Gestion du Stock', icon: 'fa-warehouse' },
   { id: 'clients', label: 'Suivi Clients', icon: 'fa-user-group' },
-  { id: 'livraison', label: 'Livraison & Facturation', icon: 'fa-truck' }
+  { id: 'livraison', label: 'Livraison & Facturation', icon: 'fa-truck' },
+  { id: 'steg', label: 'Suivi Doc STEG', icon: 'fa-file-shield' },
+  { id: 'facturation', label: 'Facturation Client', icon: 'fa-file-invoice-dollar' }
 ];
 
 export default function Sidebar({ activeView, setActiveView }) {

@@ -1,16 +1,12 @@
 import { useEffect, useRef, useMemo } from 'react';
 import Chart from 'chart.js/auto';
 import { CATEGORIES, getStockStatus, formatDA } from '../data';
+import { docProgress, STATUS_CONF } from '../data/steg';
+import { FACTURE_STATUS, calcFacture } from '../data/facturation';
 
-const recentActivities = [
-  { icon: 'fa-user-plus', color: '#10B981', text: 'Djamila Saadi ajoutée au département Commercial', time: 'Il y a 2h' },
-  { icon: 'fa-box', color: '#F97316', text: '48 Panneaux 400W réceptionnés — Entrepôt A', time: 'Il y a 5h' },
-  { icon: 'fa-triangle-exclamation', color: '#EF4444', text: 'Connecteurs MC4 en rupture de stock', time: 'Il y a 8h' },
-  { icon: 'fa-file-invoice', color: '#3B82F6', text: 'Facture #2024-0847 validée — 2.4M DA', time: 'Hier' },
-  { icon: 'fa-wrench', color: '#F59E0B', text: 'Maintenance onduleur client — Ouargla', time: 'Hier' },
-];
+const CATEGORY_MAP = { Panneaux: 'Panneaux', Onduleurs: 'Onduleurs', Batteries: 'Batteries', Câblage: 'Câblage', Accessoires: 'Accessoires' };
 
-export default function DashboardView({ employees, stock, clients }) {
+export default function DashboardView({ employees, stock, clients, bls = [], dossiers = [], factures = [] }) {
   const chartRef1 = useRef(null);
   const chartRef2 = useRef(null);
   const chart1 = useRef(null);
@@ -18,14 +14,24 @@ export default function DashboardView({ employees, stock, clients }) {
 
   const allClientOrders = useMemo(() => clients.flatMap(c => c.orders), [clients]);
 
+  const finMetrics = useMemo(() => factures.map(f => ({ ...f, ...calcFacture(f) })), [factures]);
+
   const stats = useMemo(() => {
     const activeEmp = employees.filter(e => e.status === 'active').length;
     const totalStockValue = stock.reduce((s, i) => s + i.qty * i.price, 0);
     const lowStockCount = stock.filter(i => ['low', 'empty'].includes(getStockStatus(i))).length;
-    const totalCA = allClientOrders.reduce((s, o) => s + o.total, 0);
-    const pendingOrders = allClientOrders.filter(o => !o.received).length;
-    return { activeEmp, totalEmp: employees.length, totalStockValue, lowStockCount, totalCA, pendingOrders };
-  }, [employees, stock, allClientOrders]);
+    const totalBL = bls.length;
+    const deliveredBL = bls.filter(b => b.status === 'delivered').length;
+    const stegApproved = dossiers.filter(d => d.status === 'approved').length;
+    const stegRejected = dossiers.filter(d => d.status === 'rejected').length;
+    const docsTotal = dossiers.reduce((s, d) => s + Object.values(d.docs).length, 0);
+    const docsOk = dossiers.reduce((s, d) => s + Object.values(d.docs).filter(Boolean).length, 0);
+    const totalBilled = finMetrics.reduce((s, f) => s + f.ttc, 0);
+    const totalCollected = finMetrics.reduce((s, f) => s + f.paid, 0);
+    const factPaid = factures.filter(f => f.status === 'paid').length;
+    const factOverdue = factures.filter(f => f.status === 'overdue').length;
+    return { activeEmp, totalEmp: employees.length, totalStockValue, lowStockCount, totalBL, deliveredBL, stegApproved, stegRejected, stegTotal: dossiers.length, docsTotal, docsOk, totalBilled, totalCollected, totalOutstanding: totalBilled - totalCollected, factPaid, factOverdue, totalFact: factures.length };
+  }, [employees, stock, allClientOrders, bls, dossiers, finMetrics, factures]);
 
   useEffect(() => {
     if (chart1.current) chart1.current.destroy();
@@ -39,8 +45,8 @@ export default function DashboardView({ employees, stock, clients }) {
       data: {
         labels: ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Jun', 'Jul', 'Aoû', 'Sep', 'Oct', 'Nov', 'Déc'],
         datasets: [
-          { label: 'Revenus (M DA)', data: [4.2,5.1,6.8,7.2,8.5,9.1,10.3,11.8,10.5,12.2,13.8,15.1], borderColor: '#F97316', backgroundColor: g1, fill: true, tension: 0.4, borderWidth: 2.5, pointRadius: 0, pointHoverRadius: 6, pointHoverBackgroundColor: '#F97316' },
-          { label: 'Dépenses (M DA)', data: [3.1,3.8,4.5,5.0,5.8,6.2,7.0,7.5,7.2,8.0,8.5,9.2], borderColor: '#3B82F6', backgroundColor: g2, fill: true, tension: 0.4, borderWidth: 2, pointRadius: 0, pointHoverRadius: 5, pointHoverBackgroundColor: '#3B82F6' },
+          { label: 'Revenus (M TND)', data: [4.2,5.1,6.8,7.2,8.5,9.1,10.3,11.8,10.5,12.2,13.8,15.1], borderColor: '#F97316', backgroundColor: g1, fill: true, tension: 0.4, borderWidth: 2.5, pointRadius: 0, pointHoverRadius: 6, pointHoverBackgroundColor: '#F97316' },
+          { label: 'Dépenses (M TND)', data: [3.1,3.8,4.5,5.0,5.8,6.2,7.0,7.5,7.2,8.0,8.5,9.2], borderColor: '#3B82F6', backgroundColor: g2, fill: true, tension: 0.4, borderWidth: 2, pointRadius: 0, pointHoverRadius: 5, pointHoverBackgroundColor: '#3B82F6' },
         ],
       },
       options: {
@@ -66,13 +72,34 @@ export default function DashboardView({ employees, stock, clients }) {
     return () => { if (chart1.current) chart1.current.destroy(); if (chart2.current) chart2.current.destroy(); };
   }, [stock]);
 
+  const realActivities = useMemo(() => {
+    const acts = [];
+    factures.filter(f => f.status === 'paid').slice(0, 2).forEach(f => {
+      const cl = clients.find(c => c.id === f.clientId);
+      acts.push({ icon: 'fa-file-invoice', color: '#10B981', text: `Facture ${f.id} payée — ${formatDA(calcFacture(f).ttc)}`, time: new Date(f.date).toLocaleDateString('fr-FR') });
+    });
+    bls.filter(b => b.status === 'delivered').slice(0, 2).forEach(b => {
+      const cl = clients.find(c => c.id === b.clientId);
+      acts.push({ icon: 'fa-truck', color: '#3B82F6', text: `BL ${b.id} livré — ${cl ? cl.name : ''}`, time: new Date(b.date).toLocaleDateString('fr-FR') });
+    });
+    dossiers.filter(d => d.status === 'approved').slice(0, 1).forEach(d => {
+      const cl = clients.find(c => c.id === d.clientId);
+      acts.push({ icon: 'fa-circle-check', color: '#10B981', text: `Dossier ${d.refSteg} approuvé STEG`, time: new Date(d.approvedDate).toLocaleDateString('fr-FR') });
+    });
+    stock.filter(i => ['low', 'empty'].includes(getStockStatus(i))).slice(0, 2).forEach(i => {
+      acts.push({ icon: 'fa-triangle-exclamation', color: '#EF4444', text: `${i.name} — ${i.qty === 0 ? 'Rupture' : 'Stock bas'} (${i.qty}/${i.minQty})`, time: i.location });
+    });
+    if (acts.length === 0) acts.push({ icon: 'fa-circle-info', color: '#64748B', text: 'Aucune activité récente', time: '' });
+    return acts;
+  }, [factures, bls, dossiers, stock, clients]);
+
   const topProducts = useMemo(() => [...stock].sort((a, b) => (b.qty * b.price) - (a.qty * a.price)).slice(0, 5), [stock]);
 
   const statCards = [
-    { label: 'Employés Actifs', value: stats.activeEmp, suffix: `/${stats.totalEmp}`, icon: 'fa-users', color: '#F97316', trend: '+2 ce mois', trendUp: true },
-    { label: 'Valeur du Stock', value: (stats.totalStockValue / 1000000).toFixed(1), suffix: 'M DA', icon: 'fa-warehouse', color: '#3B82F6', trend: '+12% vs trim. préc.', trendUp: true },
-    { label: 'Alertes Stock', value: stats.lowStockCount, suffix: 'produits', icon: 'fa-bell', color: '#EF4444', trend: 'Nécessite action', trendUp: false },
-    { label: "Chiffre d'Affaires", value: (stats.totalCA / 1000000).toFixed(1), suffix: `M DA (${allClientOrders.length} cmd)`, icon: 'fa-chart-line', color: '#10B981', trend: `${stats.pendingOrders} en attente`, trendUp: false },
+    { label: 'Employés Actifs', value: stats.activeEmp, suffix: `/${stats.totalEmp}`, icon: 'fa-users', color: '#F97316', trend: `${stats.totalEmp} inscrits`, trendUp: true },
+    { label: 'Facturation', value: (stats.totalBilled / 1000000).toFixed(1),     suffix: `M TND (${stats.totalFact} fact.)`, icon: 'fa-file-invoice-dollar', color: '#10B981', trend: `${formatDA(stats.totalCollected)} encaissé`, trendUp: true },
+    { label: 'En retard / Stock', value: stats.factOverdue + stats.lowStockCount, suffix: 'alertes', icon: 'fa-bell', color: '#EF4444', trend: `${stats.factOverdue} fact. en retard · ${stats.lowStockCount} produits`, trendUp: false },
+    { label: 'Dossiers STEG', value: `${stats.stegApproved}/${stats.stegTotal}`, suffix: 'approuvés', icon: 'fa-file-shield', color: '#8B5CF6', trend: `${stats.stegRejected} rejetés · ${stats.docsOk}/${stats.docsTotal} docs`, trendUp: stats.stegApproved > 0 },
   ];
 
   return (
@@ -119,8 +146,8 @@ export default function DashboardView({ employees, stock, clients }) {
         <div className="glass-card animate-slide-up" style={{ padding: 24, animationDelay: '0.25s' }}>
           <h3 style={{ fontSize: 15, fontWeight: 700, marginBottom: 18 }}>Activité Récente</h3>
           <div style={{ display: 'flex', flexDirection: 'column' }}>
-            {recentActivities.map((a, i) => (
-              <div key={i} style={{ display: 'flex', gap: 12, padding: '12px 0', borderBottom: i < recentActivities.length - 1 ? '1px solid var(--border)' : 'none' }}>
+            {realActivities.map((a, i) => (
+              <div key={i} style={{ display: 'flex', gap: 12, padding: '12px 0', borderBottom: i < realActivities.length - 1 ? '1px solid var(--border)' : 'none' }}>
                 <div style={{ width: 32, height: 32, borderRadius: 8, background: `${a.color}15`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                   <i className={`fa-solid ${a.icon}`} style={{ color: a.color, fontSize: 12 }} />
                 </div>

@@ -21,7 +21,7 @@ function printBL(bl, client) {
   setTimeout(() => { w.print(); }, 300);
 }
 
-export default function LivraisonView({ bls, setBls, clients, addToast }) {
+export default function LivraisonView({ bls, setBls, clients, addToast, onDeliverBL, onGenerateInvoice }) {
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [detailOpen, setDetailOpen] = useState(false);
@@ -103,15 +103,23 @@ export default function LivraisonView({ bls, setBls, clients, addToast }) {
   };
 
   const handleDeliver = () => {
-    setBls(prev => prev.map(b => b.id === selected.id ? { ...b, status: 'delivered' } : b));
-    setSelected(s => ({ ...s, status: 'delivered' }));
-    addToast(`${selected.id} marqué comme livré`);
+    if (onDeliverBL) {
+      onDeliverBL(selected);
+    } else {
+      setBls(prev => prev.map(b => b.id === selected.id ? { ...b, status: 'delivered' } : b));
+      setSelected(s => ({ ...s, status: 'delivered' }));
+      addToast(`${selected.id} marqué comme livré`);
+    }
   };
 
   const handleInvoice = () => {
-    setBls(prev => prev.map(b => b.id === selected.id ? { ...b, invoiced: true } : b));
-    setSelected(s => ({ ...s, invoiced: true }));
-    addToast(`Facture générée pour ${selected.id}`);
+    if (onGenerateInvoice) {
+      onGenerateInvoice(selected);
+    } else {
+      setBls(prev => prev.map(b => b.id === selected.id ? { ...b, invoiced: true } : b));
+      setSelected(s => ({ ...s, invoiced: true }));
+      addToast(`Facture générée pour ${selected.id}`);
+    }
   };
 
   const handleDelete = () => {
