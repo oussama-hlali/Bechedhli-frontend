@@ -1,6 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
 import './index.css';
-import { INITIAL_EMPLOYEES, INITIAL_STOCK, INITIAL_CLIENTS } from './data';
 import Loader from './components/Loader';
 import Sidebar from './components/Sidebar';
 import Header from './components/Header';
@@ -12,21 +11,19 @@ import ClientsView from './views/ClientsView';
 import LivraisonView from './views/LivraisonView';
 import StegView from './views/StegView';
 import FacturationView from './views/FacturationView';
-import { INITIAL_BLS } from './data/bons-livraison';
-import { INITIAL_STEG_DOSSIERS } from './data/steg';
-import { INITIAL_FACTURES } from './data/facturation';
+import { employeesApi, stockApi, clientsApi, blsApi, stegApi, facturesApi } from './api';
 import { matchBLtoStock, applyStockMutations, createInvoiceFromBL } from './data';
 
 export default function App() {
   const [activeView, setActiveView] = useState('dashboard');
-  const [employees, setEmployees] = useState(INITIAL_EMPLOYEES);
-  const [stock, setStock] = useState(INITIAL_STOCK);
-  const [clients, setClients] = useState(INITIAL_CLIENTS);
+  const [employees, setEmployees] = useState([]);
+  const [stock, setStock] = useState([]);
+  const [clients, setClients] = useState([]);
   const [toasts, setToasts] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [bls, setBls] = useState(INITIAL_BLS);
-  const [dossiers, setDossiers] = useState(INITIAL_STEG_DOSSIERS);
-  const [factures, setFactures] = useState(INITIAL_FACTURES);
+  const [bls, setBls] = useState([]);
+  const [dossiers, setDossiers] = useState([]);
+  const [factures, setFactures] = useState([]);
   const [prefillInvoice, setPrefillInvoice] = useState(null);
   const [nextFactureNum, setNextFactureNum] = useState(5);
 
@@ -37,6 +34,27 @@ export default function App() {
       setToasts(prev => prev.map(t => t.id === id ? { ...t, exiting: true } : t));
       setTimeout(() => setToasts(prev => prev.filter(t => t.id !== id)), 300);
     }, 3000);
+  }, []);
+
+  useEffect(() => {
+    Promise.all([
+      employeesApi.getAll(),
+      stockApi.getAll(),
+      clientsApi.getAll(),
+      blsApi.getAll(),
+      stegApi.getAll(),
+      facturesApi.getAll(),
+    ])
+      .then(([emps, stk, clts, b, d, f]) => {
+        setEmployees(emps);
+        setStock(stk);
+        setClients(clts.map(c => ({ ...c, orders: c.orders || [] })));
+        setBls(b.map(bl => ({ ...bl, items: bl.items || [] })));
+        setDossiers(d);
+        setFactures(f.map(fac => ({ ...fac, items: fac.items || [], payments: fac.payments || [] })));
+        setLoading(false);
+      })
+      .catch(() => setLoading(false));
   }, []);
 
   const handleDeliverBL = useCallback((bl) => {
@@ -61,11 +79,6 @@ export default function App() {
   const handleFacturer = useCallback((clientId, dossierId) => {
     setPrefillInvoice({ clientId, dossierId });
     setActiveView('facturation');
-  }, []);
-
-  useEffect(() => {
-    const timer = setTimeout(() => setLoading(false), 1200);
-    return () => clearTimeout(timer);
   }, []);
 
   if (loading) return <Loader />;

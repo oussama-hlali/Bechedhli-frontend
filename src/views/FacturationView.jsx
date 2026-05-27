@@ -2,6 +2,7 @@ import { useState, useMemo, useEffect } from 'react';
 import { Modal, ConfirmModal, ActionBtn } from '../components/Modal';
 import { FACTURE_STATUS, calcFacture, printFacture } from '../data/facturation';
 import { formatDA } from '../data';
+import { facturesApi } from '../api';
 import logoImg from '../assets/bechedhli-logo.png';
 
 function facBadge(s) {
@@ -85,7 +86,7 @@ export default function FacturationView({ factures, setFactures, clients, dossie
   const addItem = () => setForm(p => ({ ...p, items: [...p.items, { desc: '', qty: 1, unit: 'forfait', prix: 0 }] }));
   const removeItem = (idx) => { if (form.items.length <= 1) return; setForm(p => ({ ...p, items: p.items.filter((_, i) => i !== idx) })); };
 
-  const handleCreate = () => {
+  const handleCreate = async () => {
     if (!form.clientId) { addToast('Sélectionnez un client', 'error'); return; }
     const validItems = form.items.filter(i => i.desc && i.prix > 0);
     if (validItems.length === 0) { addToast('Ajoutez au moins une ligne avec un montant', 'error'); return; }
@@ -93,46 +94,54 @@ export default function FacturationView({ factures, setFactures, clients, dossie
     const ech = form.echeance || new Date(new Date(form.date).getTime() + 30 * 86400000).toISOString().split('T')[0];
     const nf = {
       id: num, clientId: Number(form.clientId), dossierId: form.dossierId ? Number(form.dossierId) : null,
-      numBL: form.numBL, date: form.date, echeance: ech, status: 'draft', items: validItems,
-      tva: form.tva, remise: form.remise, payments: [], notes: form.notes
+      numBL: form.numBL, date: form.date, echeance: ech, status: 'draft',
+      tva: form.tva, remise: form.remise, notes: form.notes
     };
-    setFactures(p => [...p, nf]);
+    const created = await facturesApi.create(nf);
+    setFactures(p => [...p, { ...created, items: created.items || [], payments: created.payments || [] }]);
     setNextNum(p => p + 1);
     setCreateOpen(false);
     addToast('Facture ' + num + ' créée');
   };
 
-  const handleSend = () => {
-    setFactures(p => p.map(f => f.id === selected.id ? { ...f, status: 'sent' } : f));
-    setSelected(s => ({ ...s, status: 'sent' }));
+  const handleSend = async () => {
+    const updated = { ...selected, status: 'sent' };
+    await facturesApi.update(selected.id, updated);
+    setFactures(p => p.map(f => f.id === selected.id ? updated : f));
+    setSelected(updated);
     addToast('Facture ' + selected.id + ' envoyée au client');
   };
 
-  const handlePay = () => {
+  const handlePay = async () => {
     const m = Number(payForm.montant);
     if (!m || m <= 0) { addToast('Saisissez un montant valide', 'error'); return; }
     const c = calcFacture(selected);
     if (m > c.reste) { addToast('Le montant dépasse le restant dû (' + formatDA(c.reste) + ')', 'error'); return; }
     const np = { date: payForm.date, montant: m, mode: payForm.mode, ref: payForm.ref };
-    const newPayments = [...selected.payments, np];
+    const newPayments = [...(selected.payments || []), np];
     const newCalc = calcFacture({ ...selected, payments: newPayments });
     const newStatus = newCalc.reste <= 0 ? 'paid' : 'partial';
-    setFactures(p => p.map(f => f.id === selected.id ? { ...f, payments: newPayments, status: newStatus } : f));
-    setSelected(s => ({ ...s, payments: newPayments, status: newStatus }));
+    const updated = { ...selected, payments: newPayments, status: newStatus };
+    await facturesApi.update(selected.id, updated);
+    setFactures(p => p.map(f => f.id === selected.id ? updated : f));
+    setSelected(updated);
     setPayOpen(false);
     addToast(newStatus === 'paid' ? 'Facture soldée !' : 'Paiement de ' + formatDA(m) + ' enregistré');
   };
 
-  const handleDelete = () => {
+  const handleDelete = async () => {
+    await facturesApi.delete(selected.id);
     setFactures(p => p.filter(f => f.id !== selected.id));
     addToast('Facture ' + selected.id + ' supprimée');
     setDeleteOpen(false);
     setDetailOpen(false);
   };
 
-  const handleMarkOverdue = () => {
-    setFactures(p => p.map(f => f.id === selected.id ? { ...f, status: 'overdue' } : f));
-    setSelected(s => ({ ...s, status: 'overdue' }));
+  const handleMarkOverdue = async () => {
+    const updated = { ...selected, status: 'overdue' };
+    await facturesApi.update(selected.id, updated);
+    setFactures(p => p.map(f => f.id === selected.id ? updated : f));
+    setSelected(updated);
     addToast('Facture marquée en retard', 'error');
   };
 

@@ -1,6 +1,7 @@
 import { useState, useMemo } from 'react';
 import { Modal, ConfirmModal } from '../components/Modal';
 import { DEPARTMENTS, ROLES, getAvatarColor, getInitials, formatDA } from '../data';
+import { employeesApi } from '../api';
 
 export default function EmployeesView({ employees, setEmployees, addToast }) {
   const [search, setSearch] = useState('');
@@ -32,19 +33,23 @@ export default function EmployeesView({ employees, setEmployees, addToast }) {
     setModalOpen(true);
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!form.name || !form.role || !form.dept) { addToast('Veuillez remplir tous les champs obligatoires', 'error'); return; }
+    const data = { ...form, salary: Number(form.salary) };
     if (editing) {
-      setEmployees(prev => prev.map(e => e.id === editing.id ? { ...e, ...form, salary: Number(form.salary) } : e));
+      await employeesApi.update(editing.id, data);
+      setEmployees(prev => prev.map(e => e.id === editing.id ? { ...e, ...data } : e));
       addToast(`${form.name} mis à jour avec succès`, 'success');
     } else {
-      setEmployees(prev => [...prev, { ...form, id: Date.now(), salary: Number(form.salary) }]);
+      const created = await employeesApi.create(data);
+      setEmployees(prev => [...prev, created]);
       addToast(`${form.name} ajouté avec succès`, 'success');
     }
     setModalOpen(false);
   };
 
-  const handleDelete = () => {
+  const handleDelete = async () => {
+    await employeesApi.delete(selected.id);
     setEmployees(prev => prev.filter(e => e.id !== selected.id));
     addToast(`${selected.name} supprimé`, 'success');
     setDeleteOpen(false);

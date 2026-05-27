@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { Modal, ConfirmModal, ActionBtn } from '../components/Modal';
+import { blsApi } from '../api';
 
 const BL_ITEM_CATEGORIES = ['panneau', 'onduleur', 'structure', 'fixation', 'câblage', 'chemin de câble', 'Tube IRO', 'accessoires', 'coffret', 'protection', 'divers'];
 
@@ -74,7 +75,7 @@ export default function LivraisonView({ bls, setBls, clients, addToast, onDelive
     }
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!form.clientId || !form.puissance) {
       addToast('Veuillez sélectionner un client et remplir la puissance', 'error');
       return;
@@ -85,7 +86,7 @@ export default function LivraisonView({ bls, setBls, clients, addToast, onDelive
       return;
     }
     const newBL = {
-      id: `BL${String(nextNum).padStart(5, '0')}`,
+      blId: `BL${String(nextNum).padStart(5, '0')}`,
       clientId: Number(form.clientId),
       type: form.type,
       date: form.date,
@@ -93,36 +94,40 @@ export default function LivraisonView({ bls, setBls, clients, addToast, onDelive
       invoiced: false,
       puissance: form.puissance,
       refSteg: form.refSteg,
-      transporteur: { name: form.transportName, matricule: form.transportMat },
-      items: validItems
+      transporteurName: form.transportName,
+      transporteurMatricule: form.transportMat,
     };
-    setBls(prev => [...prev, newBL]);
+    const created = await blsApi.create(newBL);
+    setBls(prev => [...prev, { ...created, items: created.items || [] }]);
     setNextNum(n => n + 1);
     setCreateOpen(false);
-    addToast(`Bon ${newBL.id} créé avec succès`);
+    addToast(`Bon ${created.blId || created.id} créé avec succès`);
   };
 
-  const handleDeliver = () => {
+  const handleDeliver = async () => {
     if (onDeliverBL) {
       onDeliverBL(selected);
     } else {
+      await blsApi.update(selected.id, { ...selected, status: 'delivered' });
       setBls(prev => prev.map(b => b.id === selected.id ? { ...b, status: 'delivered' } : b));
       setSelected(s => ({ ...s, status: 'delivered' }));
       addToast(`${selected.id} marqué comme livré`);
     }
   };
 
-  const handleInvoice = () => {
+  const handleInvoice = async () => {
     if (onGenerateInvoice) {
       onGenerateInvoice(selected);
     } else {
+      await blsApi.update(selected.id, { ...selected, invoiced: true });
       setBls(prev => prev.map(b => b.id === selected.id ? { ...b, invoiced: true } : b));
       setSelected(s => ({ ...s, invoiced: true }));
       addToast(`Facture générée pour ${selected.id}`);
     }
   };
 
-  const handleDelete = () => {
+  const handleDelete = async () => {
+    await blsApi.delete(selected.id);
     setBls(prev => prev.filter(b => b.id !== selected.id));
     addToast(`${selected.id} supprimé`);
     setDeleteOpen(false);
@@ -177,8 +182,8 @@ export default function LivraisonView({ bls, setBls, clients, addToast, onDelive
                       <td><span style={{ fontSize: 12, padding: '3px 8px', borderRadius: 6, background: bl.type === 'Mono' ? 'rgba(59,130,246,.1)' : 'rgba(139,92,246,.1)', color: bl.type === 'Mono' ? '#3B82F6' : '#8B5CF6', fontWeight: 600 }}>{bl.type}</span></td>
                       <td style={{ fontSize: 13, color: '#94A3B8' }}>{bl.puissance}</td>
                       <td style={{ fontSize: 13, color: '#94A3B8' }}>{new Date(bl.date).toLocaleDateString('fr-FR')}</td>
-                      <td style={{ fontSize: 12, color: 'var(--fg-muted)' }}><div>{bl.transporteur.name}</div><div style={{ fontSize: 11, opacity: .7 }}>{bl.transporteur.matricule}</div></td>
-                      <td><span style={{ fontWeight: 700, fontSize: 14 }}>{bl.items.length}</span></td>
+                      <td style={{ fontSize: 12, color: 'var(--fg-muted)' }}><div>{bl.transporteurName || bl.transporteur?.name}</div><div style={{ fontSize: 11, opacity: .7 }}>{bl.transporteurMatricule || bl.transporteur?.matricule}</div></td>
+                      <td><span style={{ fontWeight: 700, fontSize: 14 }}>{(bl.items || []).length}</span></td>
                       <td>{statusBadge(bl)}</td>
                       <td><div style={{ display: 'flex', gap: 6 }} onClick={e => e.stopPropagation()}>
                         <ActionBtn icon="fa-eye" onClick={() => { setSelected(bl); setDetailOpen(true); }} hoverColor="#F97316" label="Voir" />
@@ -211,7 +216,7 @@ export default function LivraisonView({ bls, setBls, clients, addToast, onDelive
               </div>
 
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 10, marginBottom: 20 }}>
-                {[['fa-id-card', 'CIN', cl?.cin], ['fa-bolt', 'Puissance', selected.puissance], ['fa-hashtag', 'Ref STEG', selected.refSteg], ['fa-phone', 'Téléphone', cl?.phone], ['fa-solar-panel', 'Type', selected.type], ['fa-calendar', 'Date', new Date(selected.date).toLocaleDateString('fr-FR')], ['fa-truck', 'Transporteur', selected.transporteur.name], ['fa-car', 'Matricule', selected.transporteur.matricule], ['fa-box', 'Nb Articles', selected.items.length]].map(([ic, l, v], i) => (
+                  {[['fa-id-card', 'CIN', cl?.cin], ['fa-bolt', 'Puissance', selected.puissance], ['fa-hashtag', 'Ref STEG', selected.refSteg], ['fa-phone', 'Téléphone', cl?.phone], ['fa-solar-panel', 'Type', selected.type], ['fa-calendar', 'Date', new Date(selected.date).toLocaleDateString('fr-FR')], ['fa-truck', 'Transporteur', selected.transporteurName || selected.transporteur?.name], ['fa-car', 'Matricule', selected.transporteurMatricule || selected.transporteur?.matricule], ['fa-box', 'Nb Articles', (selected.items || []).length]].map(([ic, l, v], i) => (
                   <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px', background: 'var(--detail-bg)', borderRadius: 10 }}>
                     <i className={`fa-solid ${ic}`} style={{ color: 'var(--fg-muted)', fontSize: 12, width: 16 }} /><div><p style={{ fontSize: 10, fontWeight: 600, color: 'var(--fg-muted)', textTransform: 'uppercase', letterSpacing: '.04em' }}>{l}</p><p style={{ fontSize: 13, fontWeight: 500, marginTop: 1 }}>{v || '—'}</p></div>
                   </div>
@@ -229,7 +234,7 @@ export default function LivraisonView({ bls, setBls, clients, addToast, onDelive
                 <table className="data-table" style={{ margin: 0 }}>
                   <thead><tr><th style={{ width: 40 }}>N°</th><th>Désignation</th><th>Marque / Réf</th><th>Catégorie</th><th style={{ width: 60 }}>Qté</th></tr></thead>
                   <tbody>
-                    {selected.items.map((it, i) => (
+                    {selected.items?.length > 0 ? selected.items.map((it, i) => (
                       <tr key={i} style={{ animation: `slideUp .3s ease-out ${i * .03}s both` }}>
                         <td style={{ fontWeight: 700, textAlign: 'center', fontSize: 13 }}>{it.n}</td>
                         <td style={{ fontWeight: 600, fontSize: 13 }}>{it.des}</td>
@@ -237,7 +242,7 @@ export default function LivraisonView({ bls, setBls, clients, addToast, onDelive
                         <td><span style={{ fontSize: 11, padding: '3px 8px', borderRadius: 6, background: `${catColors[it.cat] || '#64748B'}18`, color: catColors[it.cat] || '#94A3B8', fontWeight: 600, textTransform: 'uppercase' }}>{it.cat}</span>{it.note && <span style={{ fontSize: 10, color: '#64748B', marginLeft: 6, fontStyle: 'italic' }}>({it.note})</span>}</td>
                         <td style={{ fontWeight: 700, textAlign: 'center', fontSize: 15 }}>{it.qty}</td>
                       </tr>
-                    ))}
+                    )) : <tr><td colSpan={5} style={{ textAlign: 'center', padding: 20, color: 'var(--fg-muted)' }}>Aucun article</td></tr>}
                   </tbody>
                 </table>
               </div>

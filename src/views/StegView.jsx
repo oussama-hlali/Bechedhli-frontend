@@ -1,6 +1,7 @@
 import { useState, useMemo } from 'react';
 import { Modal, ConfirmModal, ActionBtn } from '../components/Modal';
 import { STEG_DOCS, STATUS_CONF, docProgress } from '../data/steg';
+import { stegApi } from '../api';
 
 function stBadge(s) {
   const c = STATUS_CONF[s];
@@ -49,54 +50,64 @@ export default function StegView({ dossiers, setDossiers, clients, addToast, onF
     setCreateOpen(true);
   };
 
-  const handleCreate = () => {
+  const handleCreate = async () => {
     if (!form.clientId || !form.refSteg) {
       addToast('Sélectionnez un client et saisissez la réf. STEG', 'error');
       return;
     }
     const nd = {
-      id: Date.now(), clientId: Number(form.clientId), refSteg: form.refSteg,
+      clientId: Number(form.clientId), refSteg: form.refSteg,
       puissance: form.puissance, status: 'prep',
       createdAt: new Date().toISOString().split('T')[0],
       submittedDate: null, approvedDate: null, notes: form.notes,
       docs: Object.fromEntries(STEG_DOCS.map(d => [d.id, false]))
     };
-    setDossiers(p => [...p, nd]);
+    const created = await stegApi.create(nd);
+    setDossiers(p => [...p, created]);
     setCreateOpen(false);
     addToast('Dossier créé avec succès');
   };
 
-  const handleDocToggle = (docId) => {
-    setDossiers(p => p.map(d => d.id === selected.id ? { ...d, docs: { ...d.docs, [docId]: !d.docs[docId] } } : d));
-    setSelected(s => ({ ...s, docs: { ...s.docs, [docId]: !s.docs[docId] } }));
+  const handleDocToggle = async (docId) => {
+    const updated = { ...selected, docs: { ...selected.docs, [docId]: !selected.docs[docId] } };
+    await stegApi.update(selected.id, updated);
+    setDossiers(p => p.map(d => d.id === selected.id ? updated : d));
+    setSelected(updated);
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!selected) return;
     if (!Object.values(selected.docs).some(Boolean)) {
       addToast('Ajoutez au moins un document', 'error');
       return;
     }
-    setDossiers(p => p.map(d => d.id === selected.id ? { ...d, status: 'submitted', submittedDate: new Date().toISOString().split('T')[0] } : d));
-    setSelected(s => ({ ...s, status: 'submitted', submittedDate: new Date().toISOString().split('T')[0] }));
+    const updated = { ...selected, status: 'submitted', submittedDate: new Date().toISOString().split('T')[0] };
+    await stegApi.update(selected.id, updated);
+    setDossiers(p => p.map(d => d.id === selected.id ? updated : d));
+    setSelected(updated);
     setSubmitOpen(false);
     addToast('Dossier soumis à la STEG');
   };
 
-  const handleApprove = () => {
-    setDossiers(p => p.map(d => d.id === selected.id ? { ...d, status: 'approved', approvedDate: new Date().toISOString().split('T')[0] } : d));
-    setSelected(s => ({ ...s, status: 'approved', approvedDate: new Date().toISOString().split('T')[0] }));
+  const handleApprove = async () => {
+    const updated = { ...selected, status: 'approved', approvedDate: new Date().toISOString().split('T')[0] };
+    await stegApi.update(selected.id, updated);
+    setDossiers(p => p.map(d => d.id === selected.id ? updated : d));
+    setSelected(updated);
     addToast('Dossier approuvé par la STEG');
   };
 
-  const handleReject = () => {
-    setDossiers(p => p.map(d => d.id === selected.id ? { ...d, status: 'rejected' } : d));
-    setSelected(s => ({ ...s, status: 'rejected' }));
+  const handleReject = async () => {
+    const updated = { ...selected, status: 'rejected' };
+    await stegApi.update(selected.id, updated);
+    setDossiers(p => p.map(d => d.id === selected.id ? updated : d));
+    setSelected(updated);
     setRejectOpen(false);
     addToast('Dossier rejeté', 'error');
   };
 
-  const handleDelete = () => {
+  const handleDelete = async () => {
+    await stegApi.delete(selected.id);
     setDossiers(p => p.filter(d => d.id !== selected.id));
     addToast('Dossier supprimé');
     setDetailOpen(false);

@@ -1,6 +1,7 @@
 import { useState, useMemo } from 'react';
 import { Modal, ConfirmModal, ActionBtn } from '../components/Modal';
 import { COMPONENT_CATALOG, getClientStats, formatDA } from '../data';
+import { clientsApi } from '../api';
 
 const LBL = { fontSize: 12, fontWeight: 600, color: 'var(--fg-muted)', marginBottom: 6, display: 'block', textTransform: 'uppercase', letterSpacing: '0.05em' };
 
@@ -34,20 +35,23 @@ export default function ClientsView({ clients, setClients, addToast }) {
   const openEditClient = (c) => { setEditing(c); setClientForm({ name: c.name, cin: c.cin, phone: c.phone, address: c.address }); setFormOpen(true); };
   const openDetail = (c) => { setSelected(c); setDetailOpen(true); };
 
-  const handleSaveClient = () => {
+  const handleSaveClient = async () => {
     if (!clientForm.name || !clientForm.cin) { addToast('Le nom et le N° CIN sont obligatoires', 'error'); return; }
     if (clientForm.cin.length < 10) { addToast('Le N° CIN doit contenir au moins 10 caractères', 'error'); return; }
     if (editing) {
+      await clientsApi.update(editing.id, clientForm);
       setClients(prev => prev.map(c => c.id === editing.id ? { ...c, ...clientForm } : c));
       addToast(`${clientForm.name} mis à jour`, 'success');
     } else {
-      setClients(prev => [...prev, { ...clientForm, id: Date.now(), orders: [], createdAt: new Date().toISOString().split('T')[0] }]);
+      const created = await clientsApi.create({ ...clientForm, createdAt: new Date().toISOString().split('T')[0] });
+      setClients(prev => [...prev, created]);
       addToast(`${clientForm.name} ajouté avec succès`, 'success');
     }
     setFormOpen(false);
   };
 
-  const handleDeleteClient = () => {
+  const handleDeleteClient = async () => {
+    await clientsApi.delete(selected.id);
     setClients(prev => prev.filter(c => c.id !== selected.id));
     addToast(`${selected.name} supprimé`, 'success');
     setDeleteOpen(false); setSelected(null); setDetailOpen(false);

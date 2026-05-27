@@ -1,6 +1,7 @@
 import { useState, useMemo } from 'react';
 import { Modal, ConfirmModal } from '../components/Modal';
 import { CATEGORIES, LOCATIONS, getStockStatus, formatDA, CAT_ICONS, CAT_COLORS } from '../data';
+import { stockApi } from '../api';
 
 export default function StockView({ stock, setStock, addToast }) {
   const [search, setSearch] = useState('');
@@ -36,19 +37,23 @@ export default function StockView({ stock, setStock, addToast }) {
     setModalOpen(true);
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!form.name || !form.category || !form.qty || !form.price) { addToast('Veuillez remplir tous les champs obligatoires', 'error'); return; }
+    const data = { ...form, qty: Number(form.qty), minQty: Number(form.minQty), price: Number(form.price) };
     if (editing) {
-      setStock(prev => prev.map(i => i.id === editing.id ? { ...i, ...form, qty: Number(form.qty), minQty: Number(form.minQty), price: Number(form.price) } : i));
+      await stockApi.update(editing.id, data);
+      setStock(prev => prev.map(i => i.id === editing.id ? { ...i, ...data } : i));
       addToast(`${form.name} mis à jour`, 'success');
     } else {
-      setStock(prev => [...prev, { ...form, id: Date.now(), qty: Number(form.qty), minQty: Number(form.minQty), price: Number(form.price) }]);
+      const created = await stockApi.create(data);
+      setStock(prev => [...prev, created]);
       addToast(`${form.name} ajouté au stock`, 'success');
     }
     setModalOpen(false);
   };
 
-  const handleDelete = () => {
+  const handleDelete = async () => {
+    await stockApi.delete(selected.id);
     setStock(prev => prev.filter(i => i.id !== selected.id));
     addToast(`${selected.name} supprimé du stock`, 'success');
     setDeleteOpen(false);
