@@ -11,11 +11,21 @@ import ClientsView from './views/ClientsView';
 import LivraisonView from './views/LivraisonView';
 import StegView from './views/StegView';
 import FacturationView from './views/FacturationView';
-import { employeesApi, stockApi, clientsApi, blsApi, stegApi, facturesApi } from './api';
-import { matchBLtoStock, applyStockMutations, createInvoiceFromBL } from './data';
+import { employeesApi, stockApi, clientsApi, blsApi, stegApi, facturesApi, businessApi } from './api';
+
+function useUrlParams() {
+  const getParams = () => new URLSearchParams(window.location.search);
+  const setParams = (params) => {
+    const qs = params.toString();
+    const url = qs ? `${window.location.pathname}?${qs}` : window.location.pathname;
+    window.history.replaceState(null, '', url);
+  };
+  return { getParams, setParams };
+}
 
 export default function App() {
-  const [activeView, setActiveView] = useState('dashboard');
+  const { getParams, setParams } = useUrlParams();
+  const [activeView, setActiveViewState] = useState(() => getParams().get('view') || 'dashboard');
   const [employees, setEmployees] = useState([]);
   const [stock, setStock] = useState([]);
   const [clients, setClients] = useState([]);
@@ -25,7 +35,15 @@ export default function App() {
   const [dossiers, setDossiers] = useState([]);
   const [factures, setFactures] = useState([]);
   const [prefillInvoice, setPrefillInvoice] = useState(null);
-  const [nextFactureNum, setNextFactureNum] = useState(5);
+
+  const setActiveView = useCallback((view) => {
+    setActiveViewState(view);
+    const p = getParams();
+    if (view === 'dashboard') p.delete('view');
+    else p.set('view', view);
+    p.delete('modal');
+    setParams(p);
+  }, [getParams, setParams]);
 
   const addToast = useCallback((message, type = 'success') => {
     const id = Date.now();
@@ -57,29 +75,42 @@ export default function App() {
       .catch(() => setLoading(false));
   }, []);
 
-  const handleDeliverBL = useCallback((bl) => {
-    const mutations = matchBLtoStock(bl.items, stock);
-    if (mutations.length > 0) {
-      setStock(prev => applyStockMutations(prev, mutations));
-      const detail = mutations.map(m => `${m.name} (-${m.decrement})`).join(', ');
-      addToast(`Stock mis à jour: ${detail}`, 'success');
-    }
-    setBls(prev => prev.map(b => b.id === bl.id ? { ...b, status: 'delivered' } : b));
-    addToast(`${bl.id} livré — stock ajusté automatiquement`);
-  }, [stock, addToast]);
+  useEffect(() => {
+    const onPop = () => {
+      const view = getParams().get('view') || 'dashboard';
+      setActiveViewState(view);
+    };
+    window.addEventListener('popstate', onPop);
+    return () => window.removeEventListener('popstate', onPop);
+  }, [getParams]);
 
-  const handleGenerateInvoice = useCallback((bl) => {
-    const invoice = createInvoiceFromBL(bl, null, nextFactureNum);
-    setFactures(prev => [...prev, invoice]);
-    setBls(prev => prev.map(b => b.id === bl.id ? { ...b, invoiced: true } : b));
-    setNextFactureNum(n => n + 1);
-    addToast(`Facture ${invoice.id} générée depuis ${bl.id}`);
-  }, [nextFactureNum, addToast]);
+  const handleDeliverBL = useCallback(async (bl) => {
+    try {
+      const delivered = await businessApi.deliverBL(bl.id);
+      setBls(prev => prev.map(b => b.id === bl.id ? { ...b, ...delivered, items: delivered.items || [] } : b));
+      const updatedStock = await stockApi.getAll();
+      setStock(updatedStock);
+      addToast(`${bl.id} livré — stock ajusté automatiquement`);
+    } catch (err) {
+      addToast(`Erreur: ${err.message}`, 'error');
+    }
+  }, [addToast]);
+
+  const handleGenerateInvoice = useCallback(async (bl) => {
+    try {
+      const invoice = await businessApi.generateInvoiceFromBL(bl.id);
+      setFactures(prev => [...prev, { ...invoice, items: invoice.items || [], payments: invoice.payments || [] }]);
+      setBls(prev => prev.map(b => b.id === bl.id ? { ...b, invoiced: true } : b));
+      addToast(`Facture ${invoice.id} générée depuis ${bl.id}`);
+    } catch (err) {
+      addToast(`Erreur: ${err.message}`, 'error');
+    }
+  }, [addToast]);
 
   const handleFacturer = useCallback((clientId, dossierId) => {
     setPrefillInvoice({ clientId, dossierId });
     setActiveView('facturation');
-  }, []);
+  }, [setActiveView]);
 
   if (loading) return <Loader />;
 

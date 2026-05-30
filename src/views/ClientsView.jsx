@@ -37,7 +37,7 @@ export default function ClientsView({ clients, setClients, addToast }) {
 
   const handleSaveClient = async () => {
     if (!clientForm.name || !clientForm.cin) { addToast('Le nom et le N° CIN sont obligatoires', 'error'); return; }
-    if (clientForm.cin.length < 10) { addToast('Le N° CIN doit contenir au moins 10 caractères', 'error'); return; }
+    if (clientForm.cin.length !== 8) { addToast('Le N° CIN doit contenir exactement 8 caractères', 'error'); return; }
     if (editing) {
       await clientsApi.update(editing.id, clientForm);
       setClients(prev => prev.map(c => c.id === editing.id ? { ...c, ...clientForm } : c));

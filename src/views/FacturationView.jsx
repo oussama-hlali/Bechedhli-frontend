@@ -95,7 +95,8 @@ export default function FacturationView({ factures, setFactures, clients, dossie
     const nf = {
       id: num, clientId: Number(form.clientId), dossierId: form.dossierId ? Number(form.dossierId) : null,
       numBL: form.numBL, date: form.date, echeance: ech, status: 'draft',
-      tva: form.tva, remise: form.remise, notes: form.notes
+      tva: form.tva, remise: form.remise, notes: form.notes,
+      items: form.items.filter(i => i.desc && i.prix > 0)
     };
     const created = await facturesApi.create(nf);
     setFactures(p => [...p, { ...created, items: created.items || [], payments: created.payments || [] }]);

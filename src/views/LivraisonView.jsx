@@ -1,19 +1,43 @@
 import React, { useState, useMemo } from 'react';
 import { Modal, ConfirmModal, ActionBtn } from '../components/Modal';
 import { blsApi } from '../api';
+import logoImg from '../assets/bechedhli-logo.png';
 
 const BL_ITEM_CATEGORIES = ['panneau', 'onduleur', 'structure', 'fixation', 'câblage', 'chemin de câble', 'Tube IRO', 'accessoires', 'coffret', 'protection', 'divers'];
 
-function printBL(bl, client) {
-  const itemsHTML = bl.items.map(it => 
+function parseOrderItem(text) {
+  const match = text.match(/^(.+?)\s+x(\d+)$/i);
+  if (match) {
+    return { des: match[1].trim(), qty: parseInt(match[2]) };
+  }
+  return { des: text.trim(), qty: 1 };
+}
+
+function guessCategory(des) {
+  const d = des.toLowerCase();
+  if (d.includes('panneau') || d.includes('solaire')) return 'panneau';
+  if (d.includes('onduleur') || d.includes('inverter')) return 'onduleur';
+  if (d.includes('batterie') || d.includes('battery') || d.includes('lithium')) return 'accessoires';
+  if (d.includes('câble') || d.includes('cable')) return 'câblage';
+  if (d.includes('structure') || d.includes('montage') || d.includes('toiture')) return 'structure';
+  if (d.includes('fixation') || d.includes('support')) return 'fixation';
+  if (d.includes('disjoncteur') || d.includes('parafoudre') || d.includes('protection')) return 'protection';
+  if (d.includes('coffret') || d.includes('armoire')) return 'coffret';
+  if (d.includes('compteur') || d.includes('énergie')) return 'accessoires';
+  if (d.includes('connecteur') || d.includes('mc4')) return 'accessoires';
+  return 'divers';
+}
+
+function printBL(bl, client, logoUrl) {
+  const itemsHTML = bl.items.map(it =>
     `<tr><td style="border:1px solid #333;padding:6px 10px;text-align:center">${it.n}</td><td style="border:1px solid #333;padding:6px 10px">${it.des}</td><td style="border:1px solid #333;padding:6px 10px">${it.marque || ''}</td><td style="border:1px solid #333;padding:6px 10px;font-style:italic;color:#555">${it.note || ''}</td><td style="border:1px solid #333;padding:6px 10px;text-align:center;font-weight:bold">${it.qty}</td></tr>`
   ).join('');
-  
+
   const w = window.open('', '', 'width=900,height=700');
-  w.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>BL ${bl.id}</title><style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:Arial,Helvetica,sans-serif;padding:20px;color:#000;font-size:12px}table{width:100%;border-collapse:collapse}.header{text-align:center;margin-bottom:15px}.header h1{font-size:14px;font-weight:bold;letter-spacing:1px}.header h2{font-size:18px;font-weight:bold;margin:6px 0}.info-grid{display:grid;grid-template-columns:120px 1fr;gap:4px 12px;margin:10px 0 15px}.info-grid .label{font-weight:bold;font-size:11px}.info-grid .value{font-size:12px}.bl-header{display:grid;grid-template-columns:1fr 100px 100px 1fr;gap:8px;align-items:center;margin:10px 0;border-bottom:2px solid #000;padding-bottom:8px}.items-table th{background:#f0f0f0;font-size:11px;text-transform:uppercase;letter-spacing:.5px}.signatures{display:grid;grid-template-columns:1fr 1fr 1fr;gap:20px;margin-top:30px;padding-top:15px}.sig-box{text-align:center;padding:30px 10px;border-top:1px solid #999}.sig-box p{font-size:10px;color:#555;margin-top:8px}.footer{text-align:center;margin-top:20px;padding-top:10px;border-top:1px solid #ccc;font-size:10px;color:#666}@media print{body{padding:10px}}</style></head><body>
-    <div class="header"><h1>BECHEDHLI SOLAR ENERGY</h1><h2>BON DE LIVRAISON</h2></div>
+  w.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>BL ${bl.id}</title><style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:Arial,Helvetica,sans-serif;padding:20px;color:#000;font-size:12px}table{width:100%;border-collapse:collapse}.header{display:flex;align-items:center;justify-content:space-between;margin-bottom:15px;border-bottom:2px solid #F97316;padding-bottom:12px}.header .logo-section{display:flex;align-items:center;gap:12px}.header .logo-section img{width:50px;height:auto}.header .logo-text h1{font-size:14px;color:#F97316;letter-spacing:1px;margin:0}.header .logo-text p{font-size:9px;color:#888;margin:0}.header h2{font-size:18px;font-weight:bold;margin:0}.info-grid{display:grid;grid-template-columns:120px 1fr;gap:4px 12px;margin:10px 0 15px}.info-grid .label{font-weight:bold;font-size:11px}.info-grid .value{font-size:12px}.bl-header{display:grid;grid-template-columns:1fr 100px 100px 1fr;gap:8px;align-items:center;margin:10px 0;border-bottom:2px solid #000;padding-bottom:8px}.items-table th{background:#f0f0f0;font-size:11px;text-transform:uppercase;letter-spacing:.5px}.signatures{display:grid;grid-template-columns:1fr 1fr 1fr;gap:20px;margin-top:30px;padding-top:15px}.sig-box{text-align:center;padding:30px 10px;border-top:1px solid #999}.sig-box p{font-size:10px;color:#555;margin-top:8px}.footer{text-align:center;margin-top:20px;padding-top:10px;border-top:1px solid #ccc;font-size:10px;color:#666}@media print{body{padding:10px}}</style></head><body>
+    <div class="header"><div class="logo-section">${logoUrl ? '<img src="' + logoUrl + '" alt="Logo" />' : ''}<div class="logo-text"><h1>BECHEDHLI SOLAR ENERGY</h1><p>Spécialiste en énergie solaire photovoltaïque</p></div></div><h2>BON DE LIVRAISON</h2></div>
     <div class="info-grid"><span class="label">Client :</span><span class="value">${client.name}</span><span class="label">Adresse :</span><span class="value">${client.address}</span><span class="label">CIN :</span><span class="value">${client.cin}</span><span class="label">Puissance :</span><span class="value">${bl.puissance}</span><span class="label">Ref STEG :</span><span class="value">${bl.refSteg}</span><span class="label">TEL :</span><span class="value">${client.phone}</span></div>
-    <div class="bl-header"><div><strong>Bon de livraison</strong><br/>${bl.id}</div><div style="text-align:center"><strong>Tri ou Mono</strong><br/>${bl.type}</div><div style="text-align:center"><strong>Date</strong><br/>${new Date(bl.date).toLocaleDateString('fr-FR')}</div><div style="text-align:right"><strong>TRANSPORTEUR</strong><br/>${bl.transporteur.name}<br/>${bl.transporteur.matricule}</div></div>
+    <div class="bl-header"><div><strong>Bon de livraison</strong><br/>${bl.id}</div><div style="text-align:center"><strong>Tri ou Mono</strong><br/>${bl.type}</div><div style="text-align:center"><strong>Date</strong><br/>${new Date(bl.date).toLocaleDateString('fr-FR')}</div><div style="text-align:right"><strong>TRANSPORTEUR</strong><br/>${bl.transporteurName || bl.transporteur?.name}<br/>${bl.transporteurMatricule || bl.transporteur?.matricule}</div></div>
     <table class="items-table"><thead><tr><th style="border:1px solid #333;padding:6px 10px;width:40px;text-align:center">N°</th><th style="border:1px solid #333;padding:6px 10px">Désignation</th><th style="border:1px solid #333;padding:6px 10px">Marque / Réf</th><th style="border:1px solid #333;padding:6px 10px;width:100px">Catégorie</th><th style="border:1px solid #333;padding:6px 10px;width:60px;text-align:center">Qte</th></tr></thead><tbody>${itemsHTML}</tbody></table>
     <div class="signatures"><div class="sig-box">Cachet et Signature<br/>Responsable Magasin</div><div class="sig-box">Cachet et Signature<br/>Magasinier</div><div class="sig-box">Signature<br/>Livreur</div></div>
     <div class="footer"><p style="font-weight:bold;margin-bottom:4px">BECHEDHLI SOLAR ENERGY</p><p>109 Rue Misk Ellil Cité Ilmi Mhamdia — 1145 Ben Arous</p><p>GSM : 96 903 425 — MF : 1952714/G</p></div>
@@ -39,6 +63,12 @@ export default function LivraisonView({ bls, setBls, clients, addToast, onDelive
   const [form, setForm] = useState(emptyForm);
 
   const getClient = (id) => clients.find(c => c.id === id);
+  const selectedClient = getClient(Number(form.clientId));
+
+  const clientOrders = useMemo(() => {
+    if (!selectedClient || !selectedClient.orders) return [];
+    return selectedClient.orders.filter(o => !o.received);
+  }, [selectedClient]);
 
   const filtered = useMemo(() => bls.filter(bl => {
     const cl = getClient(bl.clientId);
@@ -59,6 +89,30 @@ export default function LivraisonView({ bls, setBls, clients, addToast, onDelive
   const openCreate = () => {
     setForm({ ...emptyForm, date: new Date().toISOString().split('T')[0] });
     setCreateOpen(true);
+  };
+
+  const importOrderItems = (orderItems) => {
+    const parsed = orderItems.map((text, i) => {
+      const { des, qty } = parseOrderItem(text);
+      return { n: i + 1, des, marque: '', cat: guessCategory(des), qty, note: '' };
+    });
+    setForm(f => ({ ...f, items: parsed }));
+    addToast(`${parsed.length} article(s) importé(s) depuis la commande`);
+  };
+
+  const importAllPendingOrders = () => {
+    const allItems = [];
+    clientOrders.forEach(o => {
+      o.items.forEach(text => {
+        const { des, qty } = parseOrderItem(text);
+        if (!allItems.some(i => i.des === des)) {
+          allItems.push({ des, qty, marque: '', cat: guessCategory(des), note: '' });
+        }
+      });
+    });
+    const mapped = allItems.map((it, i) => ({ n: i + 1, ...it }));
+    setForm(f => ({ ...f, items: mapped.length > 0 ? mapped : f.items }));
+    if (mapped.length > 0) addToast(`${mapped.length} article(s) importé(s) des commandes en attente`);
   };
 
   const addItem = () => {
@@ -96,6 +150,7 @@ export default function LivraisonView({ bls, setBls, clients, addToast, onDelive
       refSteg: form.refSteg,
       transporteurName: form.transportName,
       transporteurMatricule: form.transportMat,
+      items: validItems.map(it => ({ ...it, qty: Number(it.qty) || 1 })),
     };
     const created = await blsApi.create(newBL);
     setBls(prev => [...prev, { ...created, items: created.items || [] }]);
@@ -224,7 +279,7 @@ export default function LivraisonView({ bls, setBls, clients, addToast, onDelive
               </div>
 
               <div style={{ display: 'flex', gap: 10, marginBottom: 20, flexWrap: 'wrap' }}>
-                <button className="btn-print" onClick={() => cl && printBL(selected, cl)}><i className="fa-solid fa-print" />Imprimer le Bon</button>
+                <button className="btn-print" onClick={() => cl && printBL(selected, cl, window.location.origin + logoImg)}><i className="fa-solid fa-print" />Imprimer le Bon</button>
                 {selected.status === 'waiting' && <button className="btn-success" onClick={handleDeliver}><i className="fa-solid fa-truck-fast" />Marquer Livré</button>}
                 {!selected.invoiced && selected.status === 'delivered' && <button className="btn-primary" onClick={handleInvoice} style={{ background: 'linear-gradient(135deg,#3B82F6,#2563EB)' }}><i className="fa-solid fa-file-invoice-dollar" />Générer Facture</button>}
                 {selected.invoiced && <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '10px 20px', borderRadius: 10, background: 'rgba(59,130,246,.1)', color: '#3B82F6', fontSize: 13, fontWeight: 600 }}><i className="fa-solid fa-check-circle" />Facture générée</span>}
@@ -251,7 +306,7 @@ export default function LivraisonView({ bls, setBls, clients, addToast, onDelive
         })()}
       </Modal>
 
-      <Modal isOpen={createOpen} onClose={() => setCreateOpen(false)} title="Nouveau Bon de Livraison" width={720}>
+      <Modal isOpen={createOpen} onClose={() => setCreateOpen(false)} title="Nouveau Bon de Livraison" width={820}>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
             <div><label style={lbl('Client *')} /><select className="input-field" value={form.clientId} onChange={e => setForm({ ...form, clientId: e.target.value })}><option value="">Sélectionner...</option>{clients.map(c => <option key={c.id} value={c.id} style={{ background: '#FFFFFF' }}>{c.name}</option>)}</select></div>
@@ -267,9 +322,41 @@ export default function LivraisonView({ bls, setBls, clients, addToast, onDelive
             <div><label style={lbl('Matricule')} /><input className="input-field" value={form.transportMat} onChange={e => setForm({ ...form, transportMat: e.target.value })} placeholder="Ex: 213 Tunis 6198" /></div>
           </div>
 
+          {/* Client orders section */}
+          {selectedClient && clientOrders.length > 0 && (
+            <div style={{ borderRadius: 12, border: '1px solid var(--border)', overflow: 'hidden' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 14px', background: 'var(--detail-bg)', borderBottom: '1px solid var(--border)' }}>
+                <p style={{ fontSize: 12, fontWeight: 600, color: 'var(--fg-muted)' }}><i className="fa-solid fa-cart-shopping" style={{ marginRight: 6 }} />Commandes en attente ({clientOrders.length})</p>
+                <button onClick={importAllPendingOrders} style={{ fontSize: 12, fontWeight: 500, padding: '5px 12px', borderRadius: 8, cursor: 'pointer', color: '#F97316', background: 'rgba(249,115,22,.1)', border: '1px solid rgba(249,115,22,.3)', fontFamily: 'DM Sans' }}><i className="fa-solid fa-download" style={{ fontSize: 10, marginRight: 4 }} />Tout importer</button>
+              </div>
+              <div style={{ padding: 8, maxHeight: 180, overflowY: 'auto' }}>
+                {clientOrders.map((o, oi) => (
+                  <div key={o.id} style={{ marginBottom: 6, padding: 8, borderRadius: 8, background: 'var(--detail-bg)' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
+                      <p style={{ fontSize: 11, fontWeight: 600, color: 'var(--fg-muted)' }}>Commande #{o.id} — {new Date(o.orderDate).toLocaleDateString('fr-FR')}</p>
+                      <button onClick={() => importOrderItems(o.items)} style={{ fontSize: 11, padding: '3px 10px', borderRadius: 6, cursor: 'pointer', color: '#3B82F6', background: 'rgba(59,130,246,.08)', border: '1px solid rgba(59,130,246,.2)', fontFamily: 'DM Sans' }}><i className="fa-solid fa-arrow-down" style={{ fontSize: 9, marginRight: 3 }} />Importer ({o.items.length})</button>
+                    </div>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
+                      {o.items.map((item, ii) => {
+                        const { des, qty } = parseOrderItem(item);
+                        return <span key={ii} style={{ fontSize: 11, padding: '2px 8px', borderRadius: 4, background: 'rgba(59,130,246,.08)', color: '#3B82F6' }}>{des} <strong>x{qty}</strong></span>;
+                      })}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {selectedClient && clientOrders.length === 0 && (
+            <div style={{ padding: 12, borderRadius: 10, background: 'rgba(249,115,22,.08)', color: '#F97316', fontSize: 13, textAlign: 'center' }}>
+              <i className="fa-solid fa-info-circle" style={{ marginRight: 6 }} />Aucune commande en attente pour ce client
+            </div>
+          )}
+
           <div>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
-              <p style={{ fontSize: 12, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '.06em', color: 'var(--fg-muted)' }}>Articles ({form.items.length})</p>
+              <p style={{ fontSize: 12, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '.06em', color: 'var(--fg-muted)' }}>Articles du Bon de Livraison ({form.items.length})</p>
               <button onClick={addItem} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 12, fontWeight: 500, padding: '6px 12px', borderRadius: 8, cursor: 'pointer', color: '#3B82F6', background: 'rgba(59,130,246,.08)', border: '1px dashed rgba(59,130,246,.3)', fontFamily: 'DM Sans' }}><i className="fa-solid fa-plus" style={{ fontSize: 11 }} />Ajouter ligne</button>
             </div>
             <div style={{ maxHeight: 320, overflowY: 'auto', borderRadius: 12, border: '1px solid var(--border)', padding: 2 }}>

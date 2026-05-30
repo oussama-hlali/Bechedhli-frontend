@@ -9,6 +9,10 @@ export default defineConfig({
       '/api': {
         target: 'http://localhost:9090',
         changeOrigin: true
+      },
+      '/graphql': {
+        target: 'http://localhost:9090',
+        changeOrigin: true
       }
     }
   }
