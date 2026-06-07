@@ -1,0 +1,7 @@
+{
+  "rewrites": [
+    { "source": "/graphql", "destination": "https://bechedhli-backend.onrender.com/graphql" },
+    { "source": "/graphiql", "destination": "https://bechedhli-backend.onrender.com/graphiql" },
+    { "source": "/(.*)", "destination": "/index.html" }
+  ]
+}
