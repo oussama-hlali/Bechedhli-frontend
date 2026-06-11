@@ -58,7 +58,8 @@ export default function LivraisonView({ bls, setBls, clients, addToast, onDelive
   const emptyForm = {
     clientId: '', type: 'Mono', date: new Date().toISOString().split('T')[0],
     puissance: '', refSteg: '', transportName: '', transportMat: '',
-    items: [{ n: 1, des: '', marque: '', cat: '', qty: 1, note: '' }]
+    items: [{ n: 1, des: '', marque: '', cat: '', qty: 1, note: '' }],
+    _inputMode: 'text'
   };
   const [form, setForm] = useState(emptyForm);
 
@@ -355,10 +356,38 @@ export default function LivraisonView({ bls, setBls, clients, addToast, onDelive
           )}
 
           <div>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
-              <p style={{ fontSize: 12, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '.06em', color: 'var(--fg-muted)' }}>Articles du Bon de Livraison ({form.items.length})</p>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12, flexWrap: 'wrap', gap: 8 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <p style={{ fontSize: 12, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '.06em', color: 'var(--fg-muted)' }}>Articles du Bon de Livraison ({form.items.length})</p>
+                <div style={{ display: 'flex', borderRadius: 8, overflow: 'hidden', border: '1px solid var(--border)' }}>
+                  <button onClick={() => setForm(f => ({ ...f, _inputMode: 'text' }))} style={{ padding: '4px 10px', fontSize: 11, fontFamily: 'DM Sans', fontWeight: 500, border: 'none', cursor: 'pointer', background: (form._inputMode || 'table') === 'text' ? '#F97316' : 'transparent', color: (form._inputMode || 'table') === 'text' ? '#fff' : 'var(--fg-muted)', transition: 'all .2s' }}>Texte</button>
+                  <button onClick={() => setForm(f => ({ ...f, _inputMode: 'table' }))} style={{ padding: '4px 10px', fontSize: 11, fontFamily: 'DM Sans', fontWeight: 500, border: 'none', cursor: 'pointer', background: (form._inputMode || 'table') === 'table' ? '#F97316' : 'transparent', color: (form._inputMode || 'table') === 'table' ? '#fff' : 'var(--fg-muted)', transition: 'all .2s' }}>Tableau</button>
+                </div>
+              </div>
               <button onClick={addItem} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 12, fontWeight: 500, padding: '6px 12px', borderRadius: 8, cursor: 'pointer', color: '#3B82F6', background: 'rgba(59,130,246,.08)', border: '1px dashed rgba(59,130,246,.3)', fontFamily: 'DM Sans' }}><i className="fa-solid fa-plus" style={{ fontSize: 11 }} />Ajouter ligne</button>
             </div>
+
+            {(form._inputMode || 'table') === 'text' ? (
+              <div style={{ marginBottom: 12, padding: 12, borderRadius: 12, border: '1px solid var(--border)', background: 'var(--detail-bg)' }}>
+                <p style={{ fontSize: 12, color: 'var(--fg-muted)', marginBottom: 8 }}>Saisissez un article par ligne au format <strong>Nom xQuantité</strong> :</p>
+                <textarea id="bl-text-input" rows={5} style={{ width: '100%', padding: 10, fontSize: 13, fontFamily: 'DM Sans', borderRadius: 8, border: '1px solid var(--border)', resize: 'vertical', background: '#fff', lineHeight: 1.6 }} placeholder={"Panneau Solaire 400W Monocristallin x12\nOnduleur Hybride 5kW x1\nBatterie Lithium 5.12kWh x2"} />
+                <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
+                  <button onClick={() => {
+                    const textarea = document.getElementById('bl-text-input');
+                    const lines = textarea.value.split('\n').filter(l => l.trim());
+                    const parsed = lines.map((line, i) => {
+                      const { des, qty } = parseOrderItem(line.trim());
+                      return { n: i + 1, des, marque: '', cat: guessCategory(des), qty, note: '' };
+                    });
+                    if (parsed.length > 0) {
+                      setForm(f => ({ ...f, items: parsed }));
+                      addToast(`${parsed.length} article(s) généré(s) depuis le texte`);
+                    }
+                  }} style={{ padding: '8px 16px', fontSize: 12, fontWeight: 600, fontFamily: 'DM Sans', borderRadius: 8, border: 'none', cursor: 'pointer', background: '#F97316', color: '#fff' }}><i className="fa-solid fa-arrow-right" style={{ fontSize: 10, marginRight: 4 }} />Générer les articles</button>
+                </div>
+              </div>
+            ) : null}
+
             <div style={{ maxHeight: 320, overflowY: 'auto', borderRadius: 12, border: '1px solid var(--border)', padding: 2 }}>
               <table className="data-table" style={{ margin: 0 }}>
                 <thead><tr><th style={{ width: 36 }}>N°</th><th>Désignation *</th><th>Marque</th><th>Catégorie</th><th>Note</th><th style={{ width: 60 }}>Qté</th><th style={{ width: 36 }}></th></tr></thead>
