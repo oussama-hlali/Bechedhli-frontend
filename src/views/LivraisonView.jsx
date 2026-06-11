@@ -28,23 +28,18 @@ function guessCategory(des) {
   return 'divers';
 }
 
-function printBL(bl, client, logoUrl) {
+function buildBLHTML(bl, client, logoUrl) {
   const itemsHTML = bl.items.map(it =>
     `<tr><td style="border:1px solid #333;padding:6px 10px;text-align:center">${it.n}</td><td style="border:1px solid #333;padding:6px 10px">${it.des}</td><td style="border:1px solid #333;padding:6px 10px">${it.marque || ''}</td><td style="border:1px solid #333;padding:6px 10px;font-style:italic;color:#555">${it.note || ''}</td><td style="border:1px solid #333;padding:6px 10px;text-align:center;font-weight:bold">${it.qty}</td></tr>`
   ).join('');
-
-  const w = window.open('', '_blank', 'width=900,height=700');
-  w.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>BL ${bl.id}</title><style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:Arial,Helvetica,sans-serif;padding:20px;color:#000;font-size:12px}table{width:100%;border-collapse:collapse}.header{display:flex;align-items:center;justify-content:space-between;margin-bottom:15px;border-bottom:2px solid #F97316;padding-bottom:12px}.header .logo-section{display:flex;align-items:center;gap:12px}.header .logo-section img{width:50px;height:auto}.header .logo-text h1{font-size:14px;color:#F97316;letter-spacing:1px;margin:0}.header .logo-text p{font-size:9px;color:#888;margin:0}.header h2{font-size:18px;font-weight:bold;margin:0}.info-grid{display:grid;grid-template-columns:120px 1fr;gap:4px 12px;margin:10px 0 15px}.info-grid .label{font-weight:bold;font-size:11px}.info-grid .value{font-size:12px}.bl-header{display:grid;grid-template-columns:1fr 100px 100px 1fr;gap:8px;align-items:center;margin:10px 0;border-bottom:2px solid #000;padding-bottom:8px}.items-table th{background:#f0f0f0;font-size:11px;text-transform:uppercase;letter-spacing:.5px}.signatures{display:grid;grid-template-columns:1fr 1fr 1fr;gap:20px;margin-top:30px;padding-top:15px}.sig-box{text-align:center;padding:30px 10px;border-top:1px solid #999}.sig-box p{font-size:10px;color:#555;margin-top:8px}.footer{text-align:center;margin-top:20px;padding-top:10px;border-top:1px solid #ccc;font-size:10px;color:#666}@media print{body{padding:10px}}@media screen{.print-btn{display:inline-block;margin-bottom:20px;padding:10px 24px;background:#F97316;color:#fff;border:none;border-radius:8px;font-size:14px;cursor:pointer;font-family:Arial,sans-serif}}</style></head><body>
-    <button class="print-btn" onclick="window.print()"><i class="fa-solid fa-print"></i> Imprimer ce document</button>
-    <script>document.querySelector('.print-btn').innerHTML='🖨️ Imprimer ce document'</script>
+  return `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>BL ${bl.id}</title><style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:Arial,Helvetica,sans-serif;padding:20px;color:#000;font-size:12px}table{width:100%;border-collapse:collapse}.header{display:flex;align-items:center;justify-content:space-between;margin-bottom:15px;border-bottom:2px solid #F97316;padding-bottom:12px}.header .logo-section{display:flex;align-items:center;gap:12px}.header .logo-section img{width:50px;height:auto}.header .logo-text h1{font-size:14px;color:#F97316;letter-spacing:1px;margin:0}.header .logo-text p{font-size:9px;color:#888;margin:0}.header h2{font-size:18px;font-weight:bold;margin:0}.info-grid{display:grid;grid-template-columns:120px 1fr;gap:4px 12px;margin:10px 0 15px}.info-grid .label{font-weight:bold;font-size:11px}.info-grid .value{font-size:12px}.bl-header{display:grid;grid-template-columns:1fr 100px 100px 1fr;gap:8px;align-items:center;margin:10px 0;border-bottom:2px solid #000;padding-bottom:8px}.items-table th{background:#f0f0f0;font-size:11px;text-transform:uppercase;letter-spacing:.5px}.signatures{display:grid;grid-template-columns:1fr 1fr 1fr;gap:20px;margin-top:30px;padding-top:15px}.sig-box{text-align:center;padding:30px 10px;border-top:1px solid #999}.sig-box p{font-size:10px;color:#555;margin-top:8px}.footer{text-align:center;margin-top:20px;padding-top:10px;border-top:1px solid #ccc;font-size:10px;color:#666}@media print{body{padding:10px}}</style></head><body>
     <div class="header"><div class="logo-section">${logoUrl ? '<img src="' + logoUrl + '" alt="Logo" />' : ''}<div class="logo-text"><h1>BECHEDHLI SOLAR ENERGY</h1><p>Spécialiste en énergie solaire photovoltaïque</p></div></div><h2>BON DE LIVRAISON</h2></div>
     <div class="info-grid"><span class="label">Client :</span><span class="value">${client.name}</span><span class="label">Adresse :</span><span class="value">${client.address}</span><span class="label">CIN :</span><span class="value">${client.cin}</span><span class="label">Puissance :</span><span class="value">${bl.puissance}</span><span class="label">Ref STEG :</span><span class="value">${bl.refSteg}</span><span class="label">TEL :</span><span class="value">${client.phone}</span></div>
     <div class="bl-header"><div><strong>Bon de livraison</strong><br/>${bl.id}</div><div style="text-align:center"><strong>Tri ou Mono</strong><br/>${bl.type}</div><div style="text-align:center"><strong>Date</strong><br/>${new Date(bl.date).toLocaleDateString('fr-FR')}</div><div style="text-align:right"><strong>TRANSPORTEUR</strong><br/>${bl.transporteurName || bl.transporteur?.name}<br/>${bl.transporteurMatricule || bl.transporteur?.matricule}</div></div>
     <table class="items-table"><thead><tr><th style="border:1px solid #333;padding:6px 10px;width:40px;text-align:center">N°</th><th style="border:1px solid #333;padding:6px 10px">Désignation</th><th style="border:1px solid #333;padding:6px 10px">Marque / Réf</th><th style="border:1px solid #333;padding:6px 10px;width:100px">Catégorie</th><th style="border:1px solid #333;padding:6px 10px;width:60px;text-align:center">Qte</th></tr></thead><tbody>${itemsHTML}</tbody></table>
     <div class="signatures"><div class="sig-box">Cachet et Signature<br/>Responsable Magasin</div><div class="sig-box">Cachet et Signature<br/>Magasinier</div><div class="sig-box">Signature<br/>Livreur</div></div>
     <div class="footer"><p style="font-weight:bold;margin-bottom:4px">BECHEDHLI SOLAR ENERGY</p><p>109 Rue Misk Ellil Cité Ilmi Mhamdia — 1145 Ben Arous</p><p>GSM : 96 903 425 — MF : 1952714/G</p></div>
-    </body></html>`);
-  w.document.close();
+    </body></html>`;
 }
 
 export default function LivraisonView({ bls, setBls, clients, addToast, onDeliverBL, onGenerateInvoice }) {
@@ -55,6 +50,7 @@ export default function LivraisonView({ bls, setBls, clients, addToast, onDelive
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [selected, setSelected] = useState(null);
   const [nextNum, setNextNum] = useState(43);
+  const [preview, setPreview] = useState({ open: false, html: '', title: '' });
 
   const emptyForm = {
     clientId: '', type: 'Mono', date: new Date().toISOString().split('T')[0],
@@ -300,7 +296,7 @@ export default function LivraisonView({ bls, setBls, clients, addToast, onDelive
               </div>
 
               <div style={{ display: 'flex', gap: 10, marginBottom: 20, flexWrap: 'wrap' }}>
-                <button className="btn-print" onClick={() => cl && printBL(selected, cl, window.location.origin + logoImg)}><i className="fa-solid fa-print" />Imprimer le Bon</button>
+                <button className="btn-print" onClick={() => cl && setPreview({ open: true, html: buildBLHTML(selected, cl, window.location.origin + logoImg), title: `BL ${selected.id}` })}><i className="fa-solid fa-print" />Imprimer le Bon</button>
                 {selected.status === 'waiting' && <button className="btn-success" onClick={handleDeliver}><i className="fa-solid fa-truck-fast" />Marquer Livré</button>}
                 {!selected.invoiced && selected.status === 'delivered' && <button className="btn-primary" onClick={handleInvoice} style={{ background: 'linear-gradient(135deg,#3B82F6,#2563EB)' }}><i className="fa-solid fa-file-invoice-dollar" />Générer Facture</button>}
                 {selected.invoiced && <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '10px 20px', borderRadius: 10, background: 'rgba(59,130,246,.1)', color: '#3B82F6', fontSize: 13, fontWeight: 600 }}><i className="fa-solid fa-check-circle" />Facture générée</span>}
@@ -408,6 +404,20 @@ export default function LivraisonView({ bls, setBls, clients, addToast, onDelive
       </Modal>
 
       <ConfirmModal isOpen={deleteOpen} onClose={() => setDeleteOpen(false)} onConfirm={handleDelete} title="Supprimer le Bon" message={`Voulez-vous vraiment supprimer ${selected?.id} ? Cette action est irréversible.`} confirmColor="#EF4444" />
+
+      <Modal isOpen={preview.open} onClose={() => setPreview({ open: false, html: '', title: '' })} title={`Aperçu — ${preview.title}`} width={820}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+          <div style={{ textAlign: 'center', padding: '8px 0' }}>
+            <button onClick={() => {
+              const iframe = document.getElementById('preview-iframe');
+              if (iframe) iframe.contentWindow.print();
+            }} style={{ padding: '10px 28px', fontSize: 14, fontWeight: 600, fontFamily: 'DM Sans', borderRadius: 10, border: 'none', cursor: 'pointer', background: '#F97316', color: '#fff' }}><i className="fa-solid fa-print" style={{ marginRight: 6 }} />Imprimer</button>
+          </div>
+          <div style={{ borderRadius: 12, overflow: 'hidden', border: '1px solid var(--border)' }}>
+            <iframe id="preview-iframe" title="Aperçu" srcDoc={preview.html} style={{ width: '100%', height: '70vh', border: 'none', background: '#fff' }} />
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 }

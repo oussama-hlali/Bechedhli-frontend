@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect } from 'react';
 import { Modal, ConfirmModal, ActionBtn } from '../components/Modal';
-import { FACTURE_STATUS, calcFacture, printFacture } from '../data/facturation';
+import { FACTURE_STATUS, calcFacture, buildFactureHTML } from '../data/facturation';
 import { formatDA } from '../data';
 import { facturesApi } from '../api';
 import logoImg from '../assets/bechedhli-logo.png';
@@ -22,6 +22,7 @@ export default function FacturationView({ factures, setFactures, clients, dossie
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [selected, setSelected] = useState(null);
   const [nextNum, setNextNum] = useState(5);
+  const [preview, setPreview] = useState({ open: false, html: '', title: '' });
 
   const getClient = (id) => clients.find(c => c.id === id);
   const getDossier = (id) => dossiers.find(d => d.id === id);
@@ -275,7 +276,7 @@ export default function FacturationView({ factures, setFactures, clients, dossie
               </div>
 
               <div style={{ display: 'flex', gap: 10, marginBottom: 20, flexWrap: 'wrap' }}>
-                <button className="btn-print" onClick={() => cl && printFacture(selected, cl, window.location.origin + logoImg)}><i className="fa-solid fa-print" />Imprimer la Facture</button>
+                <button className="btn-print" onClick={() => cl && setPreview({ open: true, html: buildFactureHTML(selected, cl, window.location.origin + logoImg), title: selected.id })}><i className="fa-solid fa-print" />Imprimer la Facture</button>
                 {selected.status === 'draft' && (
                   <button className="btn-primary" onClick={handleSend}><i className="fa-solid fa-paper-plane" />Envoyer au Client</button>
                 )}
@@ -454,6 +455,20 @@ export default function FacturationView({ factures, setFactures, clients, dossie
       </Modal>
 
       <ConfirmModal isOpen={deleteOpen} onClose={() => setDeleteOpen(false)} onConfirm={handleDelete} title="Supprimer la facture" message={'Supprimer la facture ' + (selected?.id || '') + ' ? Cette action est irréversible.'} confirmColor="#EF4444" />
+
+      <Modal isOpen={preview.open} onClose={() => setPreview({ open: false, html: '', title: '' })} title={`Aperçu — ${preview.title}`} width={820}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+          <div style={{ textAlign: 'center', padding: '8px 0' }}>
+            <button onClick={() => {
+              const iframe = document.getElementById('fac-preview-iframe');
+              if (iframe) iframe.contentWindow.print();
+            }} style={{ padding: '10px 28px', fontSize: 14, fontWeight: 600, fontFamily: 'DM Sans', borderRadius: 10, border: 'none', cursor: 'pointer', background: '#F97316', color: '#fff' }}><i className="fa-solid fa-print" style={{ marginRight: 6 }} />Imprimer</button>
+          </div>
+          <div style={{ borderRadius: 12, overflow: 'hidden', border: '1px solid var(--border)' }}>
+            <iframe id="fac-preview-iframe" title="Aperçu" srcDoc={preview.html} style={{ width: '100%', height: '70vh', border: 'none', background: '#fff' }} />
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 }
