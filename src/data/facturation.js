@@ -38,7 +38,8 @@ export function printFacture(fac, client, logoUrl) {
     .totals{width:280px;margin-left:auto}.totals .row{display:flex;justify-content:space-between;padding:6px 0;font-size:13px}.totals .row.grand{font-size:15px;font-weight:700;border-top:2px solid #1a1a1a;padding-top:10px;margin-top:4px}
     .payments{margin-top:24px;padding:16px;background:#f0fdf4;border-radius:8px;border:1px solid #bbf7d0}.payments h3{font-size:12px;color:#166534;margin-bottom:8px}
     .footer{margin-top:40px;padding-top:16px;border-top:1px solid #e2e8f0;display:flex;justify-content:space-between;font-size:10px;color:#999}
-    @media print{body{padding:20px}}</style></head><body>
+    @media print{body{padding:20px}}@media screen{.print-btn{display:inline-block;margin-bottom:20px;padding:10px 24px;background:#F97316;color:#fff;border:none;border-radius:8px;font-size:14px;cursor:pointer;font-family:Arial,sans-serif}}</style></head><body>
+    <button class="print-btn" onclick="window.print()">🖨️ Imprimer ce document</button>
     <div class="header"><div class="logo">${logoUrl ? '<img src="' + logoUrl + '" alt="Logo" />' : ''}<div class="logo-text"><h1>BECHEDHLI SOLAR ENERGY</h1><p>Spécialiste en énergie solaire photovoltaïque<br>Ouargla, Algérie</p></div></div>
     <div class="fac-info"><h2>FACTURE</h2><p><strong>${fac.id}</strong></p><p>Date : ${new Date(fac.date).toLocaleDateString('fr-FR')}</p><p>Échéance : ${new Date(fac.echeance).toLocaleDateString('fr-FR')}</p></div></div>
     <div class="parties"><div class="party"><h3>Émetteur</h3><p><strong>Bechedhli Solar Energy</strong></p><p>Ouargla, Algérie</p><p>Tél : +213 555 000 000</p><p>NIF : 000000000000000</p></div>
@@ -55,6 +56,6 @@ export function printFacture(fac, client, logoUrl) {
     ${fac.payments.length > 0 ? '<div class="payments"><h3>Paiements reçus (' + fmt(c.paid) + ')</h3>' + fac.payments.map(p => '<p style="margin-bottom:4px;font-size:12px">' + new Date(p.date).toLocaleDateString('fr-FR') + ' — ' + p.mode + ' — <strong>' + fmt(p.montant) + '</strong>' + (p.ref ? ' (Réf: ' + p.ref + ')' : '') + '</p>').join('') + (c.reste > 0 ? '<p style="margin-top:8px;font-weight:700;color:#b45309;font-size:13px">Reste à payer : ' + fmt(c.reste) + '</p>' : '<p style="margin-top:8px;font-weight:700;color:#166534;font-size:13px">Soldée</p>') + '</div>' : ''}
     ${fac.notes ? '<div style="margin-top:20px;padding:14px;background:#fffbeb;border-radius:8px;border:1px solid #fde68a;font-size:12px"><strong style="color:#92400e">Notes :</strong> ' + fac.notes + '</div>' : ''}
     <div class="footer"><span>Bechedhli Solar Energy — Ouargla, Algérie</span><span>Document généré le ${new Date().toLocaleDateString('fr-FR')} à ${new Date().toLocaleTimeString('fr-FR')}</span></div>
-    <script>setTimeout(() => window.print(), 400)<\/script></body></html>`);
+    </body></html>`);
   w.document.close();
 }
