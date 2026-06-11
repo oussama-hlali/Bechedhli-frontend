@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { Modal, ConfirmModal, ActionBtn } from '../components/Modal';
 import { blsApi } from '../api';
 import logoImg from '../assets/bechedhli-logo.png';
@@ -70,6 +70,26 @@ export default function LivraisonView({ bls, setBls, clients, addToast, onDelive
     if (!selectedClient || !selectedClient.orders) return [];
     return selectedClient.orders.filter(o => !o.received);
   }, [selectedClient]);
+
+  useEffect(() => {
+    if (!selectedClient || clientOrders.length === 0) {
+      setForm(f => ({ ...f, items: [{ n: 1, des: '', marque: '', cat: '', qty: 1, note: '' }] }));
+      return;
+    }
+    const allItems = [];
+    clientOrders.forEach(o => {
+      o.items.forEach(text => {
+        const { des, qty } = parseOrderItem(text);
+        if (!allItems.some(i => i.des === des)) {
+          allItems.push({ des, qty, marque: '', cat: guessCategory(des), note: '' });
+        }
+      });
+    });
+    const mapped = allItems.map((it, i) => ({ n: i + 1, ...it }));
+    if (mapped.length > 0) {
+      setForm(f => ({ ...f, items: mapped }));
+    }
+  }, [form.clientId]);
 
   const filtered = useMemo(() => bls.filter(bl => {
     const cl = getClient(bl.clientId);
