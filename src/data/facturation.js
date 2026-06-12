@@ -38,9 +38,9 @@ export function buildFactureHTML(fac, client, logoUrl) {
     .payments{margin-top:24px;padding:16px;background:#f0fdf4;border-radius:8px;border:1px solid #bbf7d0}.payments h3{font-size:12px;color:#166534;margin-bottom:8px}
     .footer{margin-top:40px;padding-top:16px;border-top:1px solid #e2e8f0;display:flex;justify-content:space-between;font-size:10px;color:#999}
     @media print{body{padding:20px}}</style></head><body>
-    <div class="header"><div class="logo">${logoUrl ? '<img src="' + logoUrl + '" alt="Logo" />' : ''}<div class="logo-text"><h1>BECHEDHLI SOLAR ENERGY</h1><p>Spécialiste en énergie solaire photovoltaïque<br>Ouargla, Algérie</p></div></div>
+    <div class="header"><div class="logo">${logoUrl ? '<img src="' + logoUrl + '" alt="Logo" />' : ''}<div class="logo-text"><h1>BECHEDHLI SOLAR ENERGY</h1>    <p>109 Rue Misk Ellil Cité Ilmi Mhamdia — 1145 Ben Arous</p></div></div>
     <div class="fac-info"><h2>FACTURE</h2><p><strong>${fac.id}</strong></p><p>Date : ${new Date(fac.date).toLocaleDateString('fr-FR')}</p><p>Échéance : ${new Date(fac.echeance).toLocaleDateString('fr-FR')}</p></div></div>
-    <div class="parties"><div class="party"><h3>Émetteur</h3><p><strong>Bechedhli Solar Energy</strong></p><p>Ouargla, Algérie</p><p>Tél : +213 555 000 000</p><p>NIF : 000000000000000</p></div>
+    <div class="parties">    <div class="party"><h3>Émetteur</h3><p><strong>Bechedhli Solar Energy</strong></p><p>109 Rue Misk Ellil Cité Ilmi Mhamdia</p><p>1145 Ben Arous</p><p>GSM : 96 903 425</p><p>MF : 1952714/G</p></div>
     <div class="party"><h3>Client</h3><p><strong>${client ? client.name : '—'}</strong></p><p>${client ? client.address : ''}</p><p>CIN : ${client ? client.cin : '—'}</p><p>Tél : ${client ? client.phone : ''}</p></div></div>
     ${fac.numBL ? '<p style="margin-bottom:16px;font-size:12px;color:#666">Réf. Bon de Livraison : <strong>' + fac.numBL + '</strong></p>' : ''}
     <table class="table"><thead><tr><th>N°</th><th>Désignation</th><th class="text-center">Qté</th><th>Unité</th><th class="text-right">Prix unitaire</th><th class="text-right">Montant</th></tr></thead><tbody>
@@ -53,7 +53,7 @@ export function buildFactureHTML(fac, client, logoUrl) {
     <div class="row grand"><span>TOTAL TTC</span><span>${fmt(c.ttc)}</span></div></div>
     ${fac.payments.length > 0 ? '<div class="payments"><h3>Paiements reçus (' + fmt(c.paid) + ')</h3>' + fac.payments.map(p => '<p style="margin-bottom:4px;font-size:12px">' + new Date(p.date).toLocaleDateString('fr-FR') + ' — ' + p.mode + ' — <strong>' + fmt(p.montant) + '</strong>' + (p.ref ? ' (Réf: ' + p.ref + ')' : '') + '</p>').join('') + (c.reste > 0 ? '<p style="margin-top:8px;font-weight:700;color:#b45309;font-size:13px">Reste à payer : ' + fmt(c.reste) + '</p>' : '<p style="margin-top:8px;font-weight:700;color:#166534;font-size:13px">Soldée</p>') + '</div>' : ''}
     ${fac.notes ? '<div style="margin-top:20px;padding:14px;background:#fffbeb;border-radius:8px;border:1px solid #fde68a;font-size:12px"><strong style="color:#92400e">Notes :</strong> ' + fac.notes + '</div>' : ''}
-    <div class="footer"><span>Bechedhli Solar Energy — Ouargla, Algérie</span><span>Document généré le ${new Date().toLocaleDateString('fr-FR')} à ${new Date().toLocaleTimeString('fr-FR')}</span></div>
+    <div class="footer"><span>109 Rue Misk Ellil Cité Ilmi Mhamdia — 1145 Ben Arous | GSM : 96 903 425</span><span>Document généré le ${new Date().toLocaleDateString('fr-FR')} à ${new Date().toLocaleTimeString('fr-FR')}</span></div>
     </body></html>`;
 }
 
